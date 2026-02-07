@@ -4,7 +4,8 @@ import { Hero } from "@/components/sections/Hero"
 import { Services } from "@/components/sections/Services"
 import { FeaturedWork } from "@/components/sections/FeaturedWork"
 
-export const revalidate = 60 // ISR: Revalidate every 60 seconds
+// ISR: Revalidate every 60 seconds
+export const revalidate = 60
 
 export default async function Home() {
   let homeData = null;
@@ -12,20 +13,25 @@ export default async function Home() {
   let settingsData = null;
   let projectsData = [];
 
+  // Attempt to fetch data from Sanity
   try {
-    // Fetch data concurrently for performance
-    [homeData, servicesData, settingsData, projectsData] = await Promise.all([
+    const results = await Promise.all([
       client.fetch(homePageQuery),
       client.fetch(servicesQuery),
       client.fetch(settingsQuery),
       client.fetch(projectsQuery),
-    ])
+    ]);
+
+    homeData = results[0];
+    servicesData = results[1];
+    settingsData = results[2];
+    projectsData = results[3];
   } catch (error) {
-    console.error("Sanity fetch failed:", error);
-    // Fallback to empty/default data if fetch fails (e.g. invalid dataset)
+    console.error("Sanity fetch failed (likely missing credentials/dataset):", error);
+    // Continue execution to render fallback UI
   }
 
-  // Fallback for empty data (Initial deployment state)
+  // Fallback content logic
   const heroTitle = homeData?.title || settingsData?.siteTitle?.fr || "LogoLoom"
   const heroSubtitle = homeData?.subtitle || settingsData?.siteDescription?.fr || "Tisser votre identité numérique."
 
@@ -53,9 +59,9 @@ export default async function Home() {
       <FeaturedWork projects={projectsData || []} />
 
       {/*
-        Footer (Temporary - ideally moved to layout later)
+        Footer (Simple implementation for now)
       */}
-      <footer className="py-12 border-t border-white/5 bg-surface text-center">
+      <footer className="py-12 border-t border-white/5 bg-surface text-center mt-auto">
         <p className="font-mono text-xs text-gray-500 uppercase tracking-widest">
           {settingsData?.siteTitle?.fr || "LogoLoom"} &copy; {new Date().getFullYear()} — System Active
         </p>
