@@ -1,7 +1,8 @@
 import { client } from "@/sanity/lib/client"
-import { homePageQuery, servicesQuery, settingsQuery } from "@/sanity/lib/queries"
+import { homePageQuery, servicesQuery, settingsQuery, projectsQuery } from "@/sanity/lib/queries"
 import { Hero } from "@/components/sections/Hero"
 import { Services } from "@/components/sections/Services"
+import { FeaturedWork } from "@/components/sections/FeaturedWork"
 
 export const revalidate = 60 // ISR: Revalidate every 60 seconds
 
@@ -9,13 +10,15 @@ export default async function Home() {
   let homeData = null;
   let servicesData = [];
   let settingsData = null;
+  let projectsData = [];
 
   try {
     // Fetch data concurrently for performance
-    [homeData, servicesData, settingsData] = await Promise.all([
+    [homeData, servicesData, settingsData, projectsData] = await Promise.all([
       client.fetch(homePageQuery),
       client.fetch(servicesQuery),
       client.fetch(settingsQuery),
+      client.fetch(projectsQuery),
     ])
   } catch (error) {
     console.error("Sanity fetch failed:", error);
@@ -42,6 +45,12 @@ export default async function Home() {
         Displays the grid of services fetched from Sanity.
       */}
       <Services services={servicesData || []} />
+
+      {/*
+        Featured Work Section:
+        Displays the selected projects in an asymmetric grid.
+      */}
+      <FeaturedWork projects={projectsData || []} />
 
       {/*
         Footer (Temporary - ideally moved to layout later)

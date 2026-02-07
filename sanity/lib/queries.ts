@@ -34,3 +34,24 @@ export const servicesQuery = groq`
     icon
   }
 `
+
+// Fetch Featured Projects
+export const projectsQuery = groq`
+  *[_type == "project"] | order(_createdAt desc) {
+    _id,
+    title,
+    "slug": slug.current,
+    category,
+    "mainImage": mainImage.asset->{
+      url,
+      metadata {
+        lqip,
+        dimensions
+      }
+    },
+    techStack[]->{
+      name,
+      "iconUrl": icon.asset->url
+    }
+  }
+`
