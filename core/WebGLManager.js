@@ -29,13 +29,36 @@ export default class WebGLManager {
             this.mouse.x = e.clientX;
             this.mouse.y = e.clientY;
         });
-
-        console.log('WebGL Manager Initialized');
     }
 
     async initHeroPlane() {
+        const heroWrapper = document.querySelector('.hero-image-wrapper');
         const heroImage = document.querySelector('.hero-image');
-        if (!heroImage) return;
+
+        if (!heroWrapper || !heroImage) {
+             return;
+        }
+
+        // Ensure crossOrigin is set
+        heroImage.crossOrigin = "anonymous";
+
+        // Manually force load logic
+        const imgUrl = heroImage.src;
+        // Reset src to trigger load if it was cached or weird state
+        heroImage.src = "";
+        heroImage.src = imgUrl;
+
+        await new Promise((resolve) => {
+            if (heroImage.complete) {
+                resolve();
+            } else {
+                heroImage.onload = () => resolve();
+                heroImage.onerror = () => {
+                     console.error('Failed to load hero image src:', heroImage.src);
+                     resolve();
+                };
+            }
+        });
 
         try {
             // Load shader code
@@ -66,7 +89,7 @@ export default class WebGLManager {
                 },
             };
 
-            const plane = this.curtains.addPlane(heroImage, params);
+            const plane = this.curtains.addPlane(heroWrapper, params);
 
             if (plane) {
                 plane.onRender(() => {
@@ -77,6 +100,8 @@ export default class WebGLManager {
                     const mousePos = plane.mouseToPlaneCoords(this.mouse.x, this.mouse.y);
                     plane.uniforms.uMousePosition.value = [mousePos.x, mousePos.y];
                 });
+            } else {
+                console.error('Failed to create plane. Check if image is loaded and valid.');
             }
 
         } catch (error) {

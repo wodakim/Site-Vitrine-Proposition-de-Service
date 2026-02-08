@@ -13,7 +13,7 @@ export default class Router {
         const self = this;
 
         barba.init({
-            debug: true,
+            debug: false,
             transitions: [{
                 name: 'default-transition',
                 leave(data) {

@@ -1,6 +1,6 @@
 :root {
     /* --- Colors --- */
-    --color-bg: #0e0e0e;
+    --color-bg: transparent; /* Changed for WebGL visibility */
     --color-text: #EAEAEA;
     --color-accent: #2C2CFF;
     --color-accent-alt: #FF4400; /* Orange brûlé (option) */

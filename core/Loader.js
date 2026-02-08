@@ -16,6 +16,11 @@ export default class Loader {
             this.element.style.transition = 'opacity 0.5s ease';
             this.element.style.opacity = '0';
             this.element.style.pointerEvents = 'none';
+
+            // Ensure display: none after transition
+            setTimeout(() => {
+                this.element.style.display = 'none';
+            }, 500);
         }
     }
 }
