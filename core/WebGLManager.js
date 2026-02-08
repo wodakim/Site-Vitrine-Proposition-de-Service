@@ -155,27 +155,25 @@ export default class WebGLManager {
 
                 // Load new texture
                 if (this.thumbPlane && imgUrl) {
-                    // Simple texture swap logic for Curtains
-                    // In a robust app, we'd preload textures.
-                    // Here we assume the image element updates and we load from it.
+                    // Safety check: ensure we don't load empty or undefined
+                    if (!imgUrl) return;
 
+                    // Update DOM image (hidden but used for sizing/semantic)
                     thumbImg.src = imgUrl;
 
-                    // We need to tell the plane to load the new source
-                    // Wait for load?
+                    // Preload before assigning to texture to avoid 'texImage2D' errors
                     const img = new Image();
                     img.crossOrigin = "anonymous";
                     img.src = imgUrl;
-                    img.onload = () => {
-                        this.thumbPlane.loadImages(img); // Load this specific image as texture
-                    };
 
-                    // Reveal
-                    if (window.gsap) {
-                        window.gsap.to(this.thumbPlane.uniforms.uAlpha, { value: 1, duration: 0.3 });
-                        window.gsap.to(thumbContainer, { opacity: 1, duration: 0.3 });
+                    if (img.complete) {
+                         this.thumbPlane.loadImages(img);
+                         this.revealThumb(thumbContainer);
                     } else {
-                        thumbContainer.style.opacity = 1;
+                        img.onload = () => {
+                            this.thumbPlane.loadImages(img);
+                            this.revealThumb(thumbContainer);
+                        };
                     }
                 }
             });
@@ -190,6 +188,16 @@ export default class WebGLManager {
                 }
             });
         });
+    }
+
+    revealThumb(container) {
+        if (window.gsap) {
+            window.gsap.to(this.thumbPlane.uniforms.uAlpha, { value: 1, duration: 0.3 });
+            window.gsap.to(container, { opacity: 1, duration: 0.3 });
+        } else {
+            container.style.opacity = 1;
+            this.thumbPlane.uniforms.uAlpha.value = 1;
+        }
     }
 
     handleThumbMove() {

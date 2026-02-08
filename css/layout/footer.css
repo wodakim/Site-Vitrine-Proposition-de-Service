@@ -10,6 +10,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    width: 100%;
 }
 
 .footer-content {
@@ -23,13 +24,15 @@
 
 .footer-title {
     font-family: var(--font-serif);
-    font-size: clamp(4rem, 10vw, 12rem);
+    font-size: clamp(3rem, 8vw, 10rem); /* Reduced slightly to fit better */
     line-height: 0.9;
     letter-spacing: -0.02em;
     margin-bottom: var(--spacing-lg);
     background: linear-gradient(180deg, #fff 0%, rgba(255, 255, 255, 0.5) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    word-break: break-word; /* Prevent overflow */
+    hyphens: auto;
 }
 
 .footer-cta-wrapper {

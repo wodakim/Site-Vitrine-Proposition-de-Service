@@ -40,8 +40,8 @@ class App {
             console.error('Error loading data:', error);
         }
 
-        // 4. Init WebGL
-        await this.webglManager.init();
+        // 4. Init WebGL (DISABLED FOR SAFETY ROLLBACK)
+        // await this.webglManager.init();
 
         // 5. Init Lenis
         this.initLenis();

@@ -2,10 +2,14 @@
 .agency-section {
     padding: var(--spacing-xl) 0;
     background: #0e0e0e;
+    /* Ensure grid is active if not inherited correctly, though .grid-container should handle it */
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 20px;
 }
 
 .agency-manifesto-col {
-    grid-column: span 5; /* 1-5 */
+    grid-column: 1 / 6; /* Explicit start/end */
     display: flex;
     align-items: center;
 }
@@ -18,7 +22,7 @@
 }
 
 .agency-media-col {
-    grid-column: 7 / span 6; /* 7-12 */
+    grid-column: 7 / 13; /* Explicit start/end */
     aspect-ratio: 16/9;
     border-radius: 4px;
     overflow: hidden;
@@ -27,9 +31,10 @@
 
 .agency-image {
     width: 100%;
-    height: 100%;
+    height: auto;
     object-fit: cover;
     opacity: 0.8;
+    display: block;
 }
 
 @media (max-width: 768px) {
