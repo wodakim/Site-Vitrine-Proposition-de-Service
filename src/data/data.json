@@ -1,0 +1,30 @@
+{
+    "hero": {
+        "title": "WEAVING\nDIGITAL",
+        "subtitle": "Architecture Web Créative & Immersive depuis 2020",
+        "cta": "Lancer un Projet",
+        "bg_texture": "noise"
+    },
+    "agency": {
+        "title": "Nous Définissons les Marques.",
+        "manifesto": "Nous ne créons pas simplement des sites web. Nous tissons des héritages numériques. Notre approche fusionne précision stratégique et vision artistique pour créer des expériences qui résonnent profondément.",
+        "media": "assets/silence.jpg"
+    },
+    "services": [
+        { "id": "01", "title": "Web Design", "list": ["UX/UI Design", "Prototypage", "Design Systems"] },
+        { "id": "02", "title": "Développement", "list": ["WebGL / Three.js", "Creative Coding", "Headless CMS"] },
+        { "id": "03", "title": "Branding", "list": ["Identité", "Stratégie", "Guidelines"] },
+        { "id": "04", "title": "SEO & Perf", "list": ["SEO Technique", "Core Web Vitals", "Optimisation"] }
+    ],
+    "projects": [
+        { "id": "p1", "title": "Aether Spirits", "client": "Aether Inc.", "services": "WebGL / E-Commerce", "year": "2024", "image": "assets/nebula.jpg" },
+        { "id": "p2", "title": "Chronos Watch", "client": "Horlogerie Suisse", "services": "Showcase 3D", "year": "2023", "image": "assets/urban.jpg" },
+        { "id": "p3", "title": "Velvet Mode", "client": "Maison Velvet", "services": "Portfolio / Minimal", "year": "2023", "image": "assets/silence.jpg" },
+        { "id": "p4", "title": "Apex Arch", "client": "Apex Studio", "services": "Corporate", "year": "2022", "image": "assets/urban.jpg" }
+    ],
+    "footer": {
+        "title": "Créons\nEnsemble.",
+        "email": "bonjour@logoloom.com",
+        "cta": "Démarrer le Projet"
+    }
+}
