@@ -1,0 +1,29 @@
+/* MARQUEE / TICKER */
+.ticker-section {
+    padding: 0; /* Tight under hero */
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    overflow: hidden;
+    background: #0e0e0e;
+    color: var(--color-text-light);
+    white-space: nowrap;
+}
+
+.ticker-wrap {
+    display: flex;
+    width: fit-content;
+    animation: ticker-scroll 20s linear infinite;
+}
+
+.ticker-item {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.8rem 1rem;
+    flex-shrink: 0;
+}
+
+@keyframes ticker-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); } /* Halfway if content is duplicated */
+}

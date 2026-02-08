@@ -1,81 +1,72 @@
-/* HERO GRID */
+/* SWISS HERO LAYOUT */
 .hero-section {
-    min-height: 100vh;
+    min-height: 90vh;
+    display: grid; /* Use grid instead of flex to respect parent grid-container */
+    align-items: center;
+    padding-top: var(--spacing-xl);
+    padding-bottom: var(--spacing-xl);
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.hero-title-container {
+    grid-column: span 7;
     display: flex;
-    align-items: center;
-    padding-top: var(--spacing-xl); /* Clear navbar if any */
-}
-
-.hero-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-lg);
-    width: 100%;
-    align-items: center;
-}
-
-.hero-text-col {
+    flex-direction: column;
+    justify-content: center;
     z-index: 5;
 }
 
 .hero-title {
     font-family: var(--font-serif);
-    font-size: clamp(3rem, 8vw, 6rem);
-    line-height: 1;
+    font-size: clamp(4rem, 8vw, 10rem);
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    font-weight: 400;
     margin-bottom: var(--spacing-md);
-}
-
-.hero-subtitle {
-    font-family: var(--font-sans);
-    font-size: 1.1rem;
-    opacity: 0.7;
-    margin-bottom: var(--spacing-md);
-    max-width: 400px;
-}
-
-.hero-cta {
-    display: inline-block;
-    padding: 1rem 2rem;
-    border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 50px;
     text-transform: uppercase;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
 }
 
-.hero-cta:hover {
-    background: #fff;
-    color: #000;
-}
-
-.hero-media-col {
+.hero-media-container {
+    grid-column: span 5;
     position: relative;
-    width: 100%;
-    aspect-ratio: 16/9; /* Or 1/1 depending on taste */
-    /* Container for WebGL Plane */
+    aspect-ratio: 3/4; /* Portrait */
+    border-radius: 12px;
+    overflow: hidden;
+    /* IMPORTANT: Background must be transparent for WebGL */
+    background: transparent;
 }
 
 .hero-image-wrapper {
     width: 100%;
     height: 100%;
-    overflow: hidden;
-    position: relative;
+    /* IMPORTANT: Opacity 0 to hide DOM image, but keep layout.
+       Curtains.js will render the plane in the canvas behind/on top. */
+    opacity: 0;
 }
 
 .hero-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    opacity: 0; /* Hidden for WebGL */
+    opacity: 0; /* Fallback to ensure hidden if wrapper fails */
 }
 
 @media (max-width: 768px) {
-    .hero-grid {
-        grid-template-columns: 1fr;
+    .hero-section {
+        flex-direction: column;
+        padding-top: var(--spacing-lg);
     }
-    .hero-media-col {
-        order: -1;
-        aspect-ratio: 4/3;
+    .hero-title-container {
+        grid-column: span 12;
+        order: 1;
+    }
+    .hero-media-container {
+        grid-column: span 12;
+        aspect-ratio: 16/9;
         margin-bottom: var(--spacing-md);
+        order: 0;
+    }
+    .hero-title {
+        font-size: 3rem;
     }
 }

@@ -1,64 +1,44 @@
-/* AGENCY GRID */
+/* AGENCY SECTION (Swiss Grid) */
 .agency-section {
     padding: var(--spacing-xl) 0;
+    background: #0e0e0e;
 }
 
-.agency-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-lg);
-    align-items: flex-start;
-}
-
-.agency-left .section-title {
-    margin-bottom: var(--spacing-md);
-}
-
-.manifesto-text {
-    font-size: clamp(1.2rem, 2vw, 1.8rem);
-    line-height: 1.4;
-    opacity: 0.9;
-    max-width: 90%;
-}
-
-.agency-right {
+.agency-manifesto-col {
+    grid-column: span 5; /* 1-5 */
     display: flex;
-    justify-content: flex-end;
+    align-items: center;
 }
 
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-lg);
-}
-
-.stat-item {
-    border-left: 1px solid rgba(255,255,255,0.2);
-    padding-left: var(--spacing-sm);
-}
-
-.stat-number {
-    display: block;
-    font-family: var(--font-serif);
-    font-size: 3rem;
-    color: var(--color-accent);
-    line-height: 1;
-    margin-bottom: 0.5rem;
-}
-
-.stat-label {
+.agency-manifesto {
     font-family: var(--font-sans);
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    opacity: 0.6;
+    font-size: clamp(1.5rem, 2.5vw, 2.5rem);
+    line-height: 1.2;
+    font-weight: 500;
+}
+
+.agency-media-col {
+    grid-column: 7 / span 6; /* 7-12 */
+    aspect-ratio: 16/9;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #1a1a1a;
+}
+
+.agency-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.8;
 }
 
 @media (max-width: 768px) {
-    .agency-grid {
-        grid-template-columns: 1fr;
+    .agency-manifesto-col,
+    .agency-media-col {
+        grid-column: span 12;
     }
-    .agency-right {
-        justify-content: flex-start;
+    .agency-media-col {
         margin-top: var(--spacing-md);
+        aspect-ratio: 4/3;
     }
 }

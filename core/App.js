@@ -35,7 +35,6 @@ class App {
 
             // 3. Init Components Logic
             this.initMagneticButtons();
-            // Note: initAccordion removed as services are now Bento cards
 
         } catch (error) {
             console.error('Error loading data:', error);
@@ -83,232 +82,201 @@ class App {
         if (!main || !this.data) return;
         main.innerHTML = ''; // Clear existing content
 
-        // --- SECTION 1: HERO (Revisited) ---
+        // --- SECTION A: HERO (Grid 12 Cols) ---
         if (this.data.hero_section) {
             const heroData = this.data.hero_section;
             const heroSection = document.createElement('section');
-            heroSection.className = 'hero-section container'; // Added container for framing
+            heroSection.className = 'hero-section grid-container'; // Using grid-container class
 
-            const heroGrid = document.createElement('div');
-            heroGrid.className = 'hero-grid';
-
-            // Text Column
-            const heroTextCol = document.createElement('div');
-            heroTextCol.className = 'hero-text-col';
-
+            // Col 1-7: Title
+            const heroTitleContainer = document.createElement('div');
+            heroTitleContainer.className = 'hero-title-container';
             const h1 = document.createElement('h1');
             h1.className = 'hero-title';
             h1.innerHTML = heroData.title.replace(/\n/g, '<br>');
+            heroTitleContainer.appendChild(h1);
 
-            const subtitle = document.createElement('p');
-            subtitle.className = 'hero-subtitle';
-            subtitle.innerText = heroData.subtitle;
-
-            const cta = document.createElement('a');
-            cta.className = 'hero-cta';
-            cta.href = '#projects';
-            cta.innerText = heroData.cta;
-
-            heroTextCol.appendChild(h1);
-            heroTextCol.appendChild(subtitle);
-            heroTextCol.appendChild(cta);
-
-            // Media Column (Contained WebGL)
-            const heroMediaCol = document.createElement('div');
-            heroMediaCol.className = 'hero-media-col';
-
+            // Col 8-12: WebGL Image
+            const heroMediaContainer = document.createElement('div');
+            heroMediaContainer.className = 'hero-media-container';
             const imageWrapper = document.createElement('div');
-            imageWrapper.className = 'hero-image-wrapper'; // Target for Plane
-
+            imageWrapper.className = 'hero-image-wrapper';
             const img = document.createElement('img');
             img.className = 'hero-image';
             img.crossOrigin = "anonymous";
             img.src = heroData.image.url;
             img.dataset.sampler = "planeTexture";
-
             imageWrapper.appendChild(img);
-            heroMediaCol.appendChild(imageWrapper);
+            heroMediaContainer.appendChild(imageWrapper);
 
-            heroGrid.appendChild(heroTextCol);
-            heroGrid.appendChild(heroMediaCol);
-            heroSection.appendChild(heroGrid);
+            heroSection.appendChild(heroTitleContainer);
+            heroSection.appendChild(heroMediaContainer);
             main.appendChild(heroSection);
         }
 
-        // --- SECTION 2: THE AGENCY (New) ---
+        // --- SECTION B: TICKER ---
+        const tickerSection = document.createElement('section');
+        tickerSection.className = 'ticker-section';
+        const tickerWrap = document.createElement('div');
+        tickerWrap.className = 'ticker-wrap';
+
+        const tickerText = "STRATEGY — BRANDING — DEVELOPMENT — ART DIRECTION — ";
+        // Repeat text to fill screen
+        for(let i=0; i<8; i++) {
+             const item = document.createElement('div');
+             item.className = 'ticker-item';
+             item.innerText = tickerText;
+             tickerWrap.appendChild(item);
+        }
+        tickerSection.appendChild(tickerWrap);
+        main.appendChild(tickerSection);
+
+        // --- SECTION C: AGENCY (Swiss Grid) ---
         if (this.data.agency) {
             const agencyData = this.data.agency;
             const agencySection = document.createElement('section');
-            agencySection.className = 'agency-section container bg-dark';
+            agencySection.className = 'agency-section grid-container';
 
-            const agencyGrid = document.createElement('div');
-            agencyGrid.className = 'agency-grid';
+            // Col 1-5: Manifesto
+            const manifestoCol = document.createElement('div');
+            manifestoCol.className = 'agency-manifesto-col';
+            const manifesto = document.createElement('p');
+            manifesto.className = 'agency-manifesto';
+            manifesto.innerText = agencyData.manifesto; // "We define brands..."
+            manifestoCol.appendChild(manifesto);
 
-            // Left: Manifesto
-            const leftCol = document.createElement('div');
-            leftCol.className = 'agency-left';
-            const manifestoTitle = document.createElement('h2');
-            manifestoTitle.className = 'section-title';
-            manifestoTitle.innerText = agencyData.title;
-            const manifestoText = document.createElement('p');
-            manifestoText.className = 'manifesto-text';
-            manifestoText.innerText = agencyData.manifesto;
+            // Col 7-12: Image/Video
+            const mediaCol = document.createElement('div');
+            mediaCol.className = 'agency-media-col';
+            const mediaImg = document.createElement('img');
+            mediaImg.className = 'agency-image';
+            mediaImg.src = "./assets/img/hero-texture.webp"; // Placeholder or from data if available
+            mediaCol.appendChild(mediaImg);
 
-            leftCol.appendChild(manifestoTitle);
-            leftCol.appendChild(manifestoText);
-
-            // Right: Stats
-            const rightCol = document.createElement('div');
-            rightCol.className = 'agency-right';
-            const statsGrid = document.createElement('div');
-            statsGrid.className = 'stats-grid';
-
-            agencyData.stats.forEach(stat => {
-                const statItem = document.createElement('div');
-                statItem.className = 'stat-item';
-                const num = document.createElement('span');
-                num.className = 'stat-number';
-                num.innerText = stat.number;
-                const label = document.createElement('span');
-                label.className = 'stat-label';
-                label.innerText = stat.label;
-
-                statItem.appendChild(num);
-                statItem.appendChild(label);
-                statsGrid.appendChild(statItem);
-            });
-            rightCol.appendChild(statsGrid);
-
-            agencyGrid.appendChild(leftCol);
-            agencyGrid.appendChild(rightCol);
-            agencySection.appendChild(agencyGrid);
+            agencySection.appendChild(manifestoCol);
+            agencySection.appendChild(mediaCol);
             main.appendChild(agencySection);
         }
 
-        // --- SECTION 3: SERVICES (Bento Grid) ---
+        // --- SECTION D: SERVICES (Bento UI) ---
         if (this.data.services) {
             const servicesSection = document.createElement('section');
-            servicesSection.className = 'services-section container bg-anthracite';
+            servicesSection.className = 'services-section grid-container';
             servicesSection.id = 'services';
 
-            const header = document.createElement('div');
-            header.className = 'section-header';
-            const h2 = document.createElement('h2');
-            h2.className = 'section-title';
-            h2.innerText = "Expertise.";
-            header.appendChild(h2);
-            servicesSection.appendChild(header);
+            // Header if needed, or directly grid
+            const servicesGrid = document.createElement('div');
+            servicesGrid.className = 'services-grid'; // spans 12 cols, internal grid
 
-            const bentoGrid = document.createElement('div');
-            bentoGrid.className = 'bento-grid';
-
-            this.data.services.forEach(service => {
+            this.data.services.forEach((service, index) => {
                 const card = document.createElement('div');
-                card.className = `bento-card theme-${service.bg || 'light'}`;
+                card.className = 'bento-card';
 
-                const icon = document.createElement('div');
-                icon.className = 'bento-icon';
-                icon.innerText = service.icon || '•';
+                const num = document.createElement('span');
+                num.className = 'bento-number';
+                num.innerText = `0${index + 1}`;
 
                 const title = document.createElement('h3');
                 title.className = 'bento-title';
                 title.innerText = service.title;
 
-                const desc = document.createElement('p');
-                desc.className = 'bento-desc';
-                desc.innerText = service.description;
+                const list = document.createElement('ul');
+                list.className = 'bento-list';
+                // service.description might be plain text, let's assume deliverables or split desc
+                // For now, split description by comma or use mocked items if not array
+                const items = service.deliverables || ["Strategy", "Design", "Implementation"];
+                items.forEach(itemText => {
+                    const li = document.createElement('li');
+                    li.innerText = itemText;
+                    list.appendChild(li);
+                });
 
-                card.appendChild(icon);
+                card.appendChild(num);
                 card.appendChild(title);
-                card.appendChild(desc);
-                bentoGrid.appendChild(card);
+                card.appendChild(list);
+                servicesGrid.appendChild(card);
             });
 
-            servicesSection.appendChild(bentoGrid);
+            servicesSection.appendChild(servicesGrid);
             main.appendChild(servicesSection);
         }
 
-        // --- SECTION 4: SELECTED WORKS (Clean List + Floating Thumb) ---
+        // --- SECTION E: SELECTED WORKS (Table Style) ---
         if (this.data.featured_projects) {
             const projectsSection = document.createElement('section');
-            projectsSection.className = 'projects-section container bg-dark';
+            projectsSection.className = 'projects-section grid-container';
             projectsSection.id = 'projects';
 
-            const header = document.createElement('div');
-            header.className = 'section-header';
-            const h2 = document.createElement('h2');
-            h2.className = 'section-title';
-            h2.innerText = "Selected Works.";
-            header.appendChild(h2);
-            projectsSection.appendChild(header);
-
-            const projectsList = document.createElement('div');
-            projectsList.className = 'projects-list-clean';
+            const table = document.createElement('div');
+            table.className = 'projects-table';
 
             this.data.featured_projects.forEach((proj, index) => {
-                const item = document.createElement('a');
-                item.className = 'project-item-clean';
-                item.href = proj.link || '#';
+                const row = document.createElement('a');
+                row.className = 'project-row project-item-clean'; // project-item-clean hook for WebGL
+                row.href = proj.link || '#';
+                row.dataset.img = proj.image.url;
 
-                // Store image URL in dataset for hover logic
-                item.dataset.img = proj.image.url;
-                item.dataset.disp = proj.image.displacementMap;
+                // Col 1: Index
+                const idx = document.createElement('div');
+                idx.className = 'p-idx';
+                idx.innerText = `0${index + 1}`;
 
-                const left = document.createElement('div');
-                left.className = 'project-left';
-                const idx = document.createElement('span');
-                idx.className = 'project-idx';
-                idx.innerText = `(0${index + 1})`;
-                const title = document.createElement('h3');
-                title.className = 'project-name';
-                title.innerText = proj.title;
-                left.appendChild(idx);
-                left.appendChild(title);
+                // Col 2: Client
+                const client = document.createElement('div');
+                client.className = 'p-client';
+                client.innerText = proj.client || proj.title;
 
-                const right = document.createElement('div');
-                right.className = 'project-right';
-                const client = document.createElement('span');
-                client.className = 'project-client';
-                client.innerText = proj.client;
-                const tags = document.createElement('span');
-                tags.className = 'project-tags';
-                tags.innerText = proj.tags.join(', ');
-                right.appendChild(client);
-                right.appendChild(tags);
+                // Col 3: Services
+                const services = document.createElement('div');
+                services.className = 'p-services';
+                services.innerText = proj.tags.join(', ');
 
-                item.appendChild(left);
-                item.appendChild(right);
-                projectsList.appendChild(item);
+                // Col 4: Year
+                const year = document.createElement('div');
+                year.className = 'p-year';
+                year.innerText = "2024"; // Static or data
+
+                // Col 5: Arrow
+                const arrow = document.createElement('div');
+                arrow.className = 'p-arrow';
+                arrow.innerText = "↗";
+
+                row.appendChild(idx);
+                row.appendChild(client);
+                row.appendChild(services);
+                row.appendChild(year);
+                row.appendChild(arrow);
+
+                table.appendChild(row);
             });
 
-            projectsSection.appendChild(projectsList);
-
-            // Floating Thumb Container
-            const thumbContainer = document.createElement('div');
-            thumbContainer.id = 'project-thumb-container'; // Fixed, hidden by default
-            const thumbImg = document.createElement('img');
-            thumbImg.id = 'project-thumb-img';
-            thumbImg.crossOrigin = "anonymous";
-            thumbImg.src = ""; // Empty initially
-            thumbContainer.appendChild(thumbImg);
-
-            // Append to main (outside section to be global? or inside section relative?)
-            // Global is better for following mouse freely, but if we use fixed position it works anywhere.
-            // Let's put it in main.
-            main.appendChild(thumbContainer);
+            projectsSection.appendChild(table);
             main.appendChild(projectsSection);
         }
 
+        // --- Project Thumb Container (Floating) ---
+        const thumbContainer = document.createElement('div');
+        thumbContainer.id = 'project-thumb-container';
+        const thumbImg = document.createElement('img');
+        thumbImg.id = 'project-thumb-img';
+        thumbImg.crossOrigin = "anonymous";
+        thumbImg.src = "";
+        thumbContainer.appendChild(thumbImg);
+        main.appendChild(thumbContainer);
+
+
         // --- Footer ---
         if (this.data.footer) {
-            const footerData = this.data.footer;
+             const footerData = this.data.footer;
             const footer = document.createElement('footer');
-            footer.className = 'site-footer container bg-anthracite';
+            footer.className = 'site-footer grid-container bg-dark'; // Use grid container? Or flex? footer.css might need update
+            // Let's stick to simple footer logic or update it to grid.
+            // For now, re-use existing footer logic but ensure container class
             footer.id = 'contact';
 
             // Content
             const footerContent = document.createElement('div');
-            footerContent.className = 'footer-content';
+            footerContent.className = 'footer-content col-span-12';
 
             const title = document.createElement('h2');
             title.className = 'footer-title';
@@ -328,28 +296,7 @@ class App {
             footerContent.appendChild(title);
             footerContent.appendChild(ctaWrapper);
 
-            // Bottom
-            const footerBottom = document.createElement('div');
-            footerBottom.className = 'footer-bottom';
-            const credits = document.createElement('div');
-            credits.className = 'footer-credits';
-            credits.innerText = `© ${new Date().getFullYear()} LogoLoom.`;
-            const socials = document.createElement('div');
-            socials.className = 'footer-socials';
-            if (footerData.socials) {
-                footerData.socials.forEach(social => {
-                    const link = document.createElement('a');
-                    link.className = 'footer-link';
-                    link.href = social.url;
-                    link.innerText = social.name;
-                    socials.appendChild(link);
-                });
-            }
-            footerBottom.appendChild(credits);
-            footerBottom.appendChild(socials);
-
             footer.appendChild(footerContent);
-            footer.appendChild(footerBottom);
             main.appendChild(footer);
         }
     }

@@ -1,59 +1,41 @@
-/* PROJECTS LIST & FLOATING THUMB */
-.projects-list-clean {
+/* PROJECTS TABLE (Selected Works) */
+.projects-section {
+    background: #0e0e0e;
+    padding: var(--spacing-xl) 0;
+}
+
+.projects-table {
+    grid-column: span 12;
     display: flex;
     flex-direction: column;
 }
 
-.project-item-clean {
-    display: flex;
-    justify-content: space-between;
+.project-row {
+    display: grid;
+    grid-template-columns: 1fr 4fr 4fr 1fr 2fr; /* 12 col equivalent roughly but using flex basis or subgrid */
+    /* Let's stick to flex to match grid alignment or use subgrid if supported?
+       For broad support, simple grid on the row works well if parent matches. */
+    grid-template-columns: 1fr 4fr 4fr 1fr 2fr;
     align-items: center;
-    padding: var(--spacing-md) 0;
+    padding: 2rem 0;
     border-bottom: 1px solid rgba(255,255,255,0.1);
-    transition: padding 0.3s ease, opacity 0.3s ease;
+    transition: background 0.3s ease;
     cursor: pointer;
+    text-decoration: none;
+    color: inherit;
 }
 
-.project-item-clean:hover {
-    padding: var(--spacing-md) var(--spacing-sm);
-    background: rgba(255,255,255,0.02);
+.project-row:hover {
+    background: rgba(255,255,255,0.05);
 }
 
-.project-left {
-    display: flex;
-    align-items: baseline;
-    gap: var(--spacing-md);
-}
+.p-idx { opacity: 0.4; font-family: var(--font-mono); }
+.p-client { font-family: var(--font-serif); font-size: 1.5rem; }
+.p-services { opacity: 0.6; font-size: 0.9rem; text-transform: uppercase; }
+.p-year { opacity: 0.4; font-family: var(--font-mono); }
+.p-arrow { text-align: right; opacity: 0.4; font-size: 1.2rem; }
 
-.project-idx {
-    font-family: var(--font-mono);
-    font-size: 0.9rem;
-    opacity: 0.4;
-}
-
-.project-name {
-    font-family: var(--font-serif);
-    font-size: 2.5rem;
-    font-weight: 400;
-}
-
-.project-right {
-    text-align: right;
-}
-
-.project-client {
-    display: block;
-    font-size: 1rem;
-    margin-bottom: 0.2rem;
-}
-
-.project-tags {
-    font-size: 0.8rem;
-    opacity: 0.5;
-    text-transform: uppercase;
-}
-
-/* Floating Thumb */
+/* Floating Thumb (Reuse existing style) */
 #project-thumb-container {
     position: fixed;
     top: 0;
@@ -61,34 +43,23 @@
     width: 400px;
     height: 300px;
     pointer-events: none;
-    z-index: 999; /* Above everything */
+    z-index: 999;
     opacity: 0;
-    transform: translate(-50%, -50%); /* Center on mouse */
+    transform: translate(-50%, -50%);
     overflow: hidden;
-    /* WebGL Plane will attach here */
 }
 
 #project-thumb-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    opacity: 0; /* Hidden for WebGL */
+    opacity: 0; /* for webgl */
 }
 
 @media (max-width: 768px) {
-    .project-item-clean {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
+    .project-row {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
     }
-    .project-right {
-        text-align: left;
-    }
-    .project-name {
-        font-size: 1.8rem;
-    }
-    /* Hide floating thumb on mobile */
-    #project-thumb-container {
-        display: none;
-    }
+    .p-idx, .p-year, .p-arrow { display: none; }
 }

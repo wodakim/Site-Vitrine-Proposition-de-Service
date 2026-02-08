@@ -1,13 +1,15 @@
 @import 'base/reset.css';
 @import 'base/variables.css';
 @import 'base/typography.css';
+@import 'layout/grid.css'; /* Added Grid System */
+
+@import 'layout/hero.css';
+@import 'layout/footer.css';
 
 @import 'components/agency.css';
 @import 'components/services.css';
 @import 'components/projects.css';
-
-@import 'layout/hero.css';
-@import 'layout/footer.css';
+@import 'components/ticker.css'; /* Added Ticker */
 
 /* Main Overrides */
 :root {
@@ -29,37 +31,7 @@ body {
     color: var(--color-text-light);
 }
 
-.container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 var(--spacing-md);
-}
-
-/* Background Utilities */
-.bg-dark {
-    background-color: var(--color-bg-dark);
-    color: var(--color-text-light);
-}
-
-.bg-anthracite {
-    background-color: var(--color-bg-anthracite);
-    color: var(--color-text-light);
-}
-
 section {
-    padding: var(--spacing-xl) 0;
     position: relative;
     z-index: 2; /* Above canvas */
-}
-
-.section-header {
-    margin-bottom: var(--spacing-lg);
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    padding-bottom: var(--spacing-sm);
-}
-
-.section-title {
-    font-family: var(--font-serif);
-    font-size: clamp(2rem, 5vw, 4rem);
-    font-weight: 400;
 }
