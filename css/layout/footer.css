@@ -1,6 +1,7 @@
 /* --- Footer --- */
 .site-footer {
     position: relative;
+    z-index: 10;
     padding: var(--spacing-xxl) var(--spacing-md);
     background-color: var(--color-bg);
     color: var(--color-text);
@@ -22,7 +23,7 @@
 
 .footer-title {
     font-family: var(--font-serif);
-    font-size: clamp(3rem, 15vw, 12rem);
+    font-size: clamp(4rem, 10vw, 12rem);
     line-height: 0.9;
     letter-spacing: -0.02em;
     margin-bottom: var(--spacing-lg);
