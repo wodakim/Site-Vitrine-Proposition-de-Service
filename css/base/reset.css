@@ -12,16 +12,28 @@ body {
     width: 100%;
     overflow-x: hidden;
     scroll-behavior: auto; /* Managed by Lenis */
+    background: transparent !important;
 }
 
 body {
-    background-color: var(--color-bg);
+    background-color: transparent !important;
     color: var(--color-text);
     font-family: var(--font-sans);
     font-size: var(--font-size-body);
     line-height: var(--line-height-normal);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+#canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    pointer-events: none;
+    background-color: #0e0e0e; /* Fallback */
 }
 
 img,

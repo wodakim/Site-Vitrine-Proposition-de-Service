@@ -21,13 +21,10 @@ class App {
     }
 
     async init() {
-        console.log('App Initializing...');
-
         // 1. Fetch Data
         try {
             const response = await fetch('./data/data.json');
             this.data = await response.json();
-            console.log('Data loaded:', this.data);
 
             // 2. Build DOM (Simple placeholder for now)
             this.buildDOM();
@@ -92,6 +89,8 @@ class App {
 
         const img = document.createElement('img');
         img.className = 'hero-image';
+        // Set crossOrigin BEFORE src
+        img.crossOrigin = "anonymous";
         img.src = heroData.image.url;
         img.alt = heroData.title;
         // Data attributes for Curtains
