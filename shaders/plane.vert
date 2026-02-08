@@ -23,6 +23,12 @@ void main() {
     vec3 vertexPosition = aVertexPosition;
 
     // simple ripple effect based on mouse position
+
+    // Clamp mouse position to avoid edge glitches (0 to 1 in texture space, but here we deal with vertex pos)
+    // Actually uMousePosition from Curtains is in plane local coordinates (usually -1 to 1 or pixel values)
+    // Curtains mouseToPlaneCoords returns values relative to the plane size.
+    // Let's rely on JS to smooth it, but here we can clamp the distance influence
+
     // distance from vertex to mouse
     float distanceFromMouse = distance(uMousePosition, vec2(vertexPosition.x, vertexPosition.y));
 

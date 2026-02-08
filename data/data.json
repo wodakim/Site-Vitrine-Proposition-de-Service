@@ -4,93 +4,110 @@
         "description": "Agence de Web Design & Branding"
     },
     "hero_section": {
-        "title": "Weaving Digital\nIdentities",
-        "subtitle": "Architecture Web Créative & Immersive",
-        "cta": "Découvrir nos créations",
+        "title": "We Define\nBrands.",
+        "subtitle": "Weaving Digital Identities Since 2020",
+        "cta": "Start a Project",
         "image": {
             "url": "./assets/img/hero-texture.webp",
             "displacementMap": "./assets/img/disp-map.jpg",
             "intensity": 0.65
         }
     },
+    "agency": {
+        "title": "We Define Brands.",
+        "manifesto": "We don't just build websites. We craft digital legacies. Our approach fuses strategic precision with artistic vision to create experiences that resonate.",
+        "stats": [
+            { "number": "04", "label": "Years Experience" },
+            { "number": "30+", "label": "Projects Shipped" },
+            { "number": "12", "label": "Awwwards SOTD" }
+        ]
+    },
     "services": [
         {
             "id": "service-01",
-            "title": "Creative Web Design",
-            "description": "Nous sculptons des expériences digitales qui transcendent l'ordinaire. Notre approche fusionne précision technique et vision artistique pour créer des sites qui ne sont pas seulement vus, mais ressentis. Chaque pixel est tissé avec intention.",
-            "deliverables": [
-                "UX/UI Design",
-                "Prototypage Interactif",
-                "Systèmes de Design",
-                "Direction Artistique"
-            ]
+            "icon": "🎨",
+            "title": "Web Design",
+            "description": "UX/UI Design & Prototyping",
+            "bg": "light"
         },
         {
             "id": "service-02",
-            "title": "Creative Development",
-            "description": "Donner vie aux designs statiques par la puissance du code. Nous sommes spécialisés dans le WebGL haute performance, les shaders sur mesure et les animations fluides qui repoussent les limites du navigateur. Zéro limite, zéro template.",
-            "deliverables": [
-                "WebGL / Three.js / OGL",
-                "Shaders GLSL Custom",
-                "Intégration Creative",
-                "Performance & SEO"
-            ]
+            "icon": "💻",
+            "title": "Development",
+            "description": "WebGL, React, headless CMS",
+            "bg": "dark"
         },
         {
             "id": "service-03",
-            "title": "Branding & Identité",
-            "description": "Votre marque est plus qu'un logo. C'est une histoire. Nous vous aidons à la raconter à travers un langage visuel cohérent qui résonne avec votre audience sur tous les points de contact. Une identité forte, tissée pour durer.",
-            "deliverables": [
-                "Stratégie de Marque",
-                "Logotype & Emblème",
-                "Typographie Sur Mesure",
-                "Guidelines"
-            ]
+            "icon": "✒️",
+            "title": "Branding",
+            "description": "Identity, Logo, Guidelines",
+            "bg": "dark"
+        },
+        {
+            "id": "service-04",
+            "icon": "📈",
+            "title": "SEO & Perf",
+            "description": "Technical SEO, Core Web Vitals",
+            "bg": "light"
         }
     ],
     "featured_projects": [
         {
             "id": "proj-01",
-            "title": "Aether",
-            "client": "Aether Spirits",
-            "description": "Site e-commerce expérientiel pour une marque de spiritueux.",
+            "title": "Aether Spirits",
+            "client": "Aether Inc.",
+            "description": "E-Commerce",
             "image": {
                 "url": "./assets/img/hero-texture.webp",
                 "displacementMap": "./assets/img/disp-map.jpg",
                 "intensity": 0.4
             },
-            "tags": ["E-Commerce", "WebGL"],
+            "tags": ["WebGL", "E-Shop"],
             "link": "/project/aether"
         },
         {
             "id": "proj-02",
-            "title": "Chronos",
+            "title": "Chronos Watch",
             "client": "Horlogerie Suisse",
-            "description": "Showcase interactif pour montres de luxe.",
+            "description": "Showcase",
             "image": {
                 "url": "./assets/img/hero-texture.webp",
                 "displacementMap": "./assets/img/disp-map.jpg",
                 "intensity": 0.5
             },
-            "tags": ["Showcase", "3D"],
+            "tags": ["3D", "Luxury"],
             "link": "/project/chronos"
         },
         {
             "id": "proj-03",
-            "title": "Velvet",
+            "title": "Velvet Mode",
             "client": "Maison Velvet",
-            "description": "Portfolio minimaliste pour une agence de mode.",
+            "description": "Portfolio",
             "image": {
                 "url": "./assets/img/hero-texture.webp",
                 "displacementMap": "./assets/img/disp-map.jpg",
                 "intensity": 0.3
             },
-            "tags": ["Portfolio", "Minimalist"],
+            "tags": ["Fashion", "Minimal"],
             "link": "/project/velvet"
+        },
+        {
+            "id": "proj-04",
+            "title": "Apex Arch",
+            "client": "Apex Studio",
+            "description": "Corporate",
+            "image": {
+                "url": "./assets/img/hero-texture.webp",
+                "displacementMap": "./assets/img/disp-map.jpg",
+                "intensity": 0.3
+            },
+            "tags": ["Architecture", "B2B"],
+            "link": "/project/apex"
         }
     ],
     "footer": {
-        "title": "Let's Weave The Future Together.",
+        "title": "Let's Create\nTogether.",
         "email": "hello@logoloom.com",
         "cta": "Start a Project",
         "socials": [
