@@ -7,6 +7,7 @@ export function renderHero(data, container) {
     section.className = 'hero-section';
 
     // Kinetic Typography Container
+    // Split for animation
     const kineticText = data.title.split('\n').map(line => `<span class="kinetic-line">${line}</span>`).join('<br>');
 
     section.innerHTML = `
@@ -15,8 +16,8 @@ export function renderHero(data, container) {
             <p class="hero-subtitle">${data.subtitle}</p>
             <a href="#contact" class="btn-cta" data-hover="magnetic">${data.cta}</a>
         </div>
-        <!-- Background placeholder for WebGL -->
-        <div class="hero-bg" data-texture="${data.bg_texture}"></div>
+        <!-- Background placeholder (CSS Only) -->
+        <div class="hero-bg" style="background-image: url('assets/nebula.jpg'); opacity: 0.2; background-size: cover; background-position: center; mix-blend-mode: exclusion;"></div>
     `;
     container.appendChild(section);
 }
@@ -32,7 +33,7 @@ export function renderAgency(data, container) {
         </div>
         <div class="agency-media">
             <!-- Lazy load image -->
-            <img src="${data.media}" class="agency-img" alt="Agency" loading="lazy" data-webgl="plane">
+            <img src="${data.media}" class="agency-img" alt="Agency" loading="lazy">
         </div>
     `;
     container.appendChild(section);
@@ -83,10 +84,9 @@ export function renderProjects(data, container) {
     list.className = 'projects-list';
 
     data.forEach(proj => {
-        const row = document.createElement('a');
-        row.href = `/project/${proj.id}`; // For Router interception
+        const row = document.createElement('div'); // Div because we handle click differently now
         row.className = 'project-row';
-        row.dataset.img = proj.image; // Hook for WebGL Hover
+        row.dataset.img = proj.image; // Hook for Hover
 
         row.innerHTML = `
             <span class="p-client">${proj.client}</span>

@@ -13,34 +13,34 @@
     <!-- CSS -->
     <link rel="stylesheet" href="./src/css/style.css">
 
-    <!-- Libraries (Global CDNs) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-    <script src="https://unpkg.com/@barba/core"></script>
-    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
-    <script src="https://www.curtainsjs.com/build/curtains.min.js"></script>
+    <!-- NO EXTERNAL JS LIBRARIES -->
 </head>
-<body data-barba="wrapper">
+<body>
 
     <!-- Loader -->
     <div id="loader">
         <div class="loader-bar"></div>
     </div>
 
-    <!-- WebGL Canvas -->
-    <div id="canvas"></div>
-
-    <!-- Barba Container -->
-    <main data-barba="container" data-barba-namespace="home">
-        <div id="app">
-            <!-- Content injected by JS -->
-        </div>
+    <!-- Main Content -->
+    <main id="app">
+        <!-- Content injected by JS -->
     </main>
 
-    <!-- Floating Thumb Container -->
+    <!-- Floating Thumb Container (CSS Only now) -->
     <div id="project-thumb-container">
-        <img id="project-thumb-img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" alt="" crossorigin="anonymous">
+        <img id="project-thumb-img" src="" alt="">
     </div>
+
+    <!-- SVG Filter for Distortion (CSS Replacement) -->
+    <svg style="position: absolute; width: 0; height: 0; pointer-events: none;">
+        <defs>
+            <filter id="liquid">
+                <feTurbulence type="fractalNoise" baseFrequency="0.01 0.02" numOctaves="1" result="warp" />
+                <feDisplacementMap xChannelSelector="R" yChannelSelector="G" scale="30" in="SourceGraphic" in2="warp" />
+            </filter>
+        </defs>
+    </svg>
 
     <!-- JS -->
     <script type="module" src="./src/app.js"></script>

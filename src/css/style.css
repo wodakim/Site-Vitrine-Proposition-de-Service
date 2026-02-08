@@ -11,38 +11,18 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
+html {
+    scroll-behavior: smooth; /* Native smooth scroll */
+}
+
 body {
     background-color: var(--bg-color);
     color: var(--text-color);
     font-family: var(--font-sans);
     margin: 0;
     overflow-x: hidden;
-    cursor: none; /* Custom cursor */
+    cursor: auto;
 }
-
-/* Custom Cursor */
-body::after {
-    content: '';
-    position: fixed;
-    top: 0; left: 0;
-    width: 20px; height: 20px;
-    background: white;
-    border-radius: 50%;
-    mix-blend-mode: difference;
-    pointer-events: none;
-    z-index: 9999;
-    transform: translate(-50%, -50%);
-    transition: transform 0.1s;
-    /* JS sets top/left via style or we use simple CSS logic if JS wasn't requested for cursor.
-       Prompt asked for "Curseur Magnétique". I'll use simple CSS follow for now or let the user cursor be visible?
-       The prompt says "Tu dois intégrer... Curseur Magnétique".
-       I haven't implemented cursor logic in JS yet.
-       I'll use default cursor for now to avoid usability issues, unless I add JS.
-    */
-    display: none;
-}
-body.custom-cursor { cursor: none; } /* Only if implemented */
-body { cursor: auto; } /* Revert */
 
 /* Typography */
 h1, h2, h3, h4 { font-family: var(--font-serif); font-weight: 400; margin: 0; }
@@ -54,11 +34,30 @@ a { color: inherit; text-decoration: none; }
     position: fixed; inset: 0; z-index: 999;
     background: var(--bg-color);
     display: flex; align-items: center; justify-content: center;
+    transition: opacity 0.5s ease;
 }
-.loader-bar { width: 0%; height: 2px; background: var(--text-color); transition: width 0.3s; }
+.loader-bar {
+    width: 30%; height: 2px;
+    background: var(--text-color);
+    animation: loading 1.5s infinite ease-in-out;
+}
+@keyframes loading {
+    0% { transform: scaleX(0); transform-origin: left; }
+    50% { transform: scaleX(1); transform-origin: left; }
+    51% { transform: scaleX(1); transform-origin: right; }
+    100% { transform: scaleX(0); transform-origin: right; }
+}
 
-/* WebGL */
-#canvas { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+/* Animations Reveal */
+.reveal-hidden {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s cubic-bezier(0.2, 1, 0.3, 1);
+}
+.reveal-active {
+    opacity: 1;
+    transform: translateY(0);
+}
 
 /* Structure */
 .grid-container {
@@ -66,7 +65,6 @@ a { color: inherit; text-decoration: none; }
     display: grid;
     grid-template-columns: repeat(12, 1fr);
     gap: var(--grid-gap);
-    /* border-bottom: 1px solid rgba(255,255,255,0.1); */
 }
 
 /* Hero */
@@ -77,12 +75,18 @@ a { color: inherit; text-decoration: none; }
     position: relative;
     overflow: hidden;
 }
+.hero-bg {
+    position: absolute; inset: 0; z-index: -1;
+    transition: transform 0.2s ease-out; /* Subtle parallax if added via JS */
+}
 .hero-title {
     font-size: clamp(3rem, 12vw, 12rem);
     line-height: 0.85;
     text-transform: uppercase;
     mix-blend-mode: exclusion;
     white-space: nowrap;
+    will-change: transform; /* Optimize for skew */
+    transform-origin: center center;
 }
 .kinetic-line { display: block; }
 .hero-subtitle {
@@ -98,17 +102,17 @@ a { color: inherit; text-decoration: none; }
     align-items: center;
 }
 .agency-text { grid-column: 1 / 7; }
-.agency-media { grid-column: 8 / -1; position: relative; }
+.agency-media { grid-column: 8 / -1; }
 .agency-manifesto {
     font-size: clamp(2rem, 4vw, 4rem);
     line-height: 1.1;
 }
 .agency-img {
     width: 100%; height: auto;
-    opacity: 0; /* Handled by WebGL if mapped, else CSS fade in? */
-    /* Since we didn't map agency img to WebGL in webgl.js yet, let's make it visible */
-    opacity: 1;
+    filter: grayscale(100%) contrast(1.2);
+    transition: filter 0.5s ease;
 }
+.agency-img:hover { filter: grayscale(0%); }
 
 /* Services */
 .services-section { padding-top: 10vh; padding-bottom: 10vh; }
@@ -126,7 +130,11 @@ a { color: inherit; text-decoration: none; }
     grid-template-columns: repeat(2, 1fr);
     gap: 40px;
 }
-.service-card { padding: 20px; border-top: 1px solid rgba(255,255,255,0.2); }
+.service-card {
+    padding: 20px; border-top: 1px solid rgba(255,255,255,0.2);
+    transition: background 0.3s ease;
+}
+.service-card:hover { background: rgba(255,255,255,0.05); }
 .service-id { font-family: var(--font-sans); opacity: 0.5; display: block; margin-bottom: 10px; }
 .service-title { font-size: 2rem; margin-bottom: 20px; }
 .service-list { list-style: none; padding: 0; opacity: 0.7; }
@@ -142,31 +150,35 @@ a { color: inherit; text-decoration: none; }
     padding: 30px 0;
     border-top: 1px solid rgba(255,255,255,0.1);
     align-items: baseline;
-    transition: opacity 0.3s;
+    transition: opacity 0.3s, color 0.3s;
     font-size: clamp(1rem, 1.5vw, 1.5rem);
+    cursor: pointer;
 }
 .project-row:last-child { border-bottom: 1px solid rgba(255,255,255,0.1); }
-.project-row:hover { opacity: 1; }
-.projects-list:hover .project-row:not(:hover) { opacity: 0.3; }
+.project-row:hover { opacity: 1; color: white; } /* Highlight */
+.projects-list:hover .project-row:not(:hover) { opacity: 0.3; } /* Dim others */
 
 .p-client { font-family: var(--font-sans); opacity: 0.6; font-size: 0.8em; }
-.p-title { font-family: var(--font-serif); font-size: 1.5em; }
+.p-title { font-family: var(--font-serif); font-size: 1.5em; text-transform: uppercase; }
 .p-service { font-family: var(--font-sans); opacity: 0.6; font-size: 0.8em; text-align: right; }
 .p-year { font-family: var(--font-sans); opacity: 0.6; font-size: 0.8em; text-align: right; }
 
-/* Project Thumb Reveal */
+/* Project Thumb Reveal (CSS Only) */
 #project-thumb-container {
     position: fixed;
     top: 0; left: 0;
-    width: 30vw; height: 40vh; /* Aspect ratio */
+    width: 300px; height: 400px; /* Fixed size thumb */
     pointer-events: none;
     z-index: 10;
     opacity: 0;
-    /* Centered on mouse via JS transform */
+    transition: opacity 0.3s ease, transform 0.1s linear; /* Smooth fade, fast follow */
+    mix-blend-mode: normal; /* Normal image */
+    overflow: hidden;
 }
 #project-thumb-container img {
     width: 100%; height: 100%; object-fit: cover;
-    opacity: 0; /* WebGL renders the texture */
+    /* Simulate liquid distortion with SVG filter if supported, else just image */
+    /* filter: url('#liquid');  Chrome might lag with this on moving element */
 }
 
 /* Footer */
@@ -198,6 +210,8 @@ a { color: inherit; text-decoration: none; }
     font-size: 0.9rem;
     transition: all 0.3s;
     background: transparent;
+    position: relative;
+    overflow: hidden;
 }
 .btn-cta:hover {
     background: var(--text-color);
@@ -207,10 +221,11 @@ a { color: inherit; text-decoration: none; }
 /* Responsive */
 @media (max-width: 768px) {
     .grid-container { grid-template-columns: 1fr; }
-    .hero-title { font-size: 15vw; }
+    .hero-title { font-size: 15vw; white-space: normal; word-break: break-word; }
     .agency-text, .agency-media, .section-header, .services-grid { grid-column: 1 / -1; }
     .services-grid { grid-template-columns: 1fr; }
     .project-row { grid-template-columns: 1fr; gap: 10px; }
-    .p-client, .p-service, .p-year { display: none; } /* Simplify for mobile */
+    .p-client, .p-service, .p-year { display: none; }
     .p-title { font-size: 1.5rem; }
+    #project-thumb-container { display: none; } /* Hide hover effect on touch */
 }

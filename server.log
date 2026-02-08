@@ -1,0 +1,7 @@
+127.0.0.1 - - [08/Feb/2026 22:53:43] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [08/Feb/2026 22:53:43] "GET /src/css/style.css HTTP/1.1" 200 -
+127.0.0.1 - - [08/Feb/2026 22:53:43] "GET /src/app.js HTTP/1.1" 200 -
+127.0.0.1 - - [08/Feb/2026 22:53:43] "GET /src/components/renderer.js HTTP/1.1" 200 -
+127.0.0.1 - - [08/Feb/2026 22:53:43] "GET /src/data/data.json HTTP/1.1" 200 -
+127.0.0.1 - - [08/Feb/2026 22:53:43] "GET /assets/nebula.jpg HTTP/1.1" 200 -
+127.0.0.1 - - [08/Feb/2026 22:53:43] "GET /assets/silence.jpg HTTP/1.1" 200 -
