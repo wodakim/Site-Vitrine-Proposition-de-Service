@@ -5,8 +5,10 @@
 
 /* --- Layout --- */
 @import 'layout/grid.css';
+@import 'layout/footer.css';
 
 /* --- Components --- */
 @import 'components/loader.css';
 @import 'components/hero.css';
 @import 'components/projects.css';
+@import 'components/services.css';
