@@ -1,0 +1,74 @@
+{
+    "site": {
+        "title": "LogoLoom",
+        "description": "Agence de Web Design & Branding"
+    },
+    "hero_section": {
+        "title": "Weaving Digital\nIdentities",
+        "subtitle": "Architecture Web Créative & Immersive",
+        "cta": "Découvrir nos créations",
+        "image": {
+            "url": "./assets/img/hero-texture.webp",
+            "displacementMap": "./assets/img/disp-map.jpg",
+            "intensity": 0.65
+        }
+    },
+    "services": [
+        {
+            "id": "service-01",
+            "title": "Web Design",
+            "description": "Interfaces immersives qui captivent l'audience."
+        },
+        {
+            "id": "service-02",
+            "title": "Creative Dev",
+            "description": "WebGL, Interactions physiques, Animations fluides."
+        },
+        {
+            "id": "service-03",
+            "title": "Identité",
+            "description": "Systèmes de design complets et vectoriels."
+        }
+    ],
+    "featured_projects": [
+        {
+            "id": "proj-01",
+            "title": "Aether",
+            "client": "Aether Spirits",
+            "description": "Site e-commerce expérientiel pour une marque de spiritueux.",
+            "image": {
+                "url": "./assets/img/hero-texture.webp",
+                "displacementMap": "./assets/img/disp-map.jpg",
+                "intensity": 0.4
+            },
+            "tags": ["E-Commerce", "WebGL"],
+            "link": "/project/aether"
+        },
+        {
+            "id": "proj-02",
+            "title": "Chronos",
+            "client": "Horlogerie Suisse",
+            "description": "Showcase interactif pour montres de luxe.",
+            "image": {
+                "url": "./assets/img/hero-texture.webp",
+                "displacementMap": "./assets/img/disp-map.jpg",
+                "intensity": 0.5
+            },
+            "tags": ["Showcase", "3D"],
+            "link": "/project/chronos"
+        },
+        {
+            "id": "proj-03",
+            "title": "Velvet",
+            "client": "Maison Velvet",
+            "description": "Portfolio minimaliste pour une agence de mode.",
+            "image": {
+                "url": "./assets/img/hero-texture.webp",
+                "displacementMap": "./assets/img/disp-map.jpg",
+                "intensity": 0.3
+            },
+            "tags": ["Portfolio", "Minimalist"],
+            "link": "/project/velvet"
+        }
+    ]
+}

@@ -1,0 +1,70 @@
+/* --- Font Face Definitions --- */
+
+@font-face {
+    font-family: 'Playfair Display';
+    src: url('../../assets/fonts/PlayfairDisplay-Variable.woff2') format('woff2');
+    font-weight: 400 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Playfair Display';
+    src: url('../../assets/fonts/PlayfairDisplay-Italic-Variable.woff2') format('woff2');
+    font-weight: 400 900;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Space Grotesk';
+    src: url('../../assets/fonts/SpaceGrotesk-Variable.woff2') format('woff2');
+    font-weight: 300 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* --- Base Styles --- */
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
+    font-weight: 400; /* Editorial look often uses lighter weights for large type */
+    line-height: var(--line-height-tight);
+    letter-spacing: -0.02em; /* Tight tracking */
+}
+
+h1 {
+    font-size: var(--font-size-h1);
+}
+
+h2 {
+    font-size: var(--font-size-h2);
+}
+
+h3 {
+    font-size: var(--font-size-h3);
+}
+
+p {
+    font-family: var(--font-sans);
+    font-size: var(--font-size-body);
+    font-weight: 300;
+    max-width: 60ch; /* Readable line length */
+}
+
+.text-accent {
+    color: var(--color-accent);
+}
+
+.text-uppercase {
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.font-serif {
+    font-family: var(--font-serif);
+}
+
+.font-sans {
+    font-family: var(--font-sans);
+}

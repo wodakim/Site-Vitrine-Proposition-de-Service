@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0A0A0B">
+    <title>LogoLoom - Creative Web Architecture</title>
+
+    <!-- Preload Critical Fonts -->
+    <link rel="preload" href="./assets/fonts/PlayfairDisplay-Variable.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="./assets/fonts/SpaceGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="./css/main.css">
+</head>
+<body data-barba="wrapper">
+
+    <!-- Loader -->
+    <div id="loader">
+        <span class="loader-progress">0%</span>
+    </div>
+
+    <!-- WebGL Canvas (Fixed Background) -->
+    <div id="canvas"></div>
+
+    <!-- Main Content (Barba Container) -->
+    <main data-barba="container" data-barba-namespace="home">
+        <!-- Content will be injected here by JS -->
+    </main>
+
+    <!-- Vendor Scripts (CDN) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+    <script src="https://unpkg.com/@barba/core@2.9.7/dist/barba.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/curtainsjs/8.1.6/curtains.min.js"></script>
+
+    <!-- Application Logic -->
+    <script type="module" src="./core/App.js"></script>
+
+</body>
+</html>
