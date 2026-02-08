@@ -16,18 +16,36 @@
     "services": [
         {
             "id": "service-01",
-            "title": "Web Design",
-            "description": "Interfaces immersives qui captivent l'audience."
+            "title": "Creative Web Design",
+            "description": "Nous sculptons des expériences digitales qui transcendent l'ordinaire. Notre approche fusionne précision technique et vision artistique pour créer des sites qui ne sont pas seulement vus, mais ressentis. Chaque pixel est tissé avec intention.",
+            "deliverables": [
+                "UX/UI Design",
+                "Prototypage Interactif",
+                "Systèmes de Design",
+                "Direction Artistique"
+            ]
         },
         {
             "id": "service-02",
-            "title": "Creative Dev",
-            "description": "WebGL, Interactions physiques, Animations fluides."
+            "title": "Creative Development",
+            "description": "Donner vie aux designs statiques par la puissance du code. Nous sommes spécialisés dans le WebGL haute performance, les shaders sur mesure et les animations fluides qui repoussent les limites du navigateur. Zéro limite, zéro template.",
+            "deliverables": [
+                "WebGL / Three.js / OGL",
+                "Shaders GLSL Custom",
+                "Intégration Creative",
+                "Performance & SEO"
+            ]
         },
         {
             "id": "service-03",
-            "title": "Identité",
-            "description": "Systèmes de design complets et vectoriels."
+            "title": "Branding & Identité",
+            "description": "Votre marque est plus qu'un logo. C'est une histoire. Nous vous aidons à la raconter à travers un langage visuel cohérent qui résonne avec votre audience sur tous les points de contact. Une identité forte, tissée pour durer.",
+            "deliverables": [
+                "Stratégie de Marque",
+                "Logotype & Emblème",
+                "Typographie Sur Mesure",
+                "Guidelines"
+            ]
         }
     ],
     "featured_projects": [
@@ -70,5 +88,16 @@
             "tags": ["Portfolio", "Minimalist"],
             "link": "/project/velvet"
         }
-    ]
+    ],
+    "footer": {
+        "title": "Let's Weave The Future Together.",
+        "email": "hello@logoloom.com",
+        "cta": "Start a Project",
+        "socials": [
+            { "name": "Instagram", "url": "#" },
+            { "name": "Twitter", "url": "#" },
+            { "name": "Awwwards", "url": "#" },
+            { "name": "LinkedIn", "url": "#" }
+        ]
+    }
 }
