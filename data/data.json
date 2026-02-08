@@ -1,120 +1,30 @@
 {
-    "site": {
-        "title": "LogoLoom",
-        "description": "Agence de Web Design & Branding"
-    },
-    "hero_section": {
-        "title": "We Define\nBrands.",
-        "subtitle": "Weaving Digital Identities Since 2020",
-        "cta": "Start a Project",
-        "image": {
-            "url": "./assets/img/hero-texture.webp",
-            "displacementMap": "./assets/img/disp-map.jpg",
-            "intensity": 0.65
-        }
+    "hero": {
+        "title": "Weaving\nDigital\nIdentities",
+        "subtitle": "Architecture Web Créative & Immersive since 2020",
+        "cta": "Start Project",
+        "image": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop"
     },
     "agency": {
         "title": "We Define Brands.",
-        "manifesto": "We don't just build websites. We craft digital legacies. Our approach fuses strategic precision with artistic vision to create experiences that resonate.",
-        "stats": [
-            { "number": "04", "label": "Years Experience" },
-            { "number": "30+", "label": "Projects Shipped" },
-            { "number": "12", "label": "Awwwards SOTD" }
-        ]
+        "manifesto": "We don't just build websites. We craft digital legacies. Our approach fuses strategic precision with artistic vision to create experiences that resonate deeply.",
+        "media": "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2670&auto=format&fit=crop"
     },
     "services": [
-        {
-            "id": "service-01",
-            "icon": "🎨",
-            "title": "Web Design",
-            "description": "UX/UI Design & Prototyping",
-            "bg": "light"
-        },
-        {
-            "id": "service-02",
-            "icon": "💻",
-            "title": "Development",
-            "description": "WebGL, React, headless CMS",
-            "bg": "dark"
-        },
-        {
-            "id": "service-03",
-            "icon": "✒️",
-            "title": "Branding",
-            "description": "Identity, Logo, Guidelines",
-            "bg": "dark"
-        },
-        {
-            "id": "service-04",
-            "icon": "📈",
-            "title": "SEO & Perf",
-            "description": "Technical SEO, Core Web Vitals",
-            "bg": "light"
-        }
+        { "id": "01", "title": "Web Design", "list": ["UX/UI Design", "Prototyping", "Design Systems"] },
+        { "id": "02", "title": "Development", "list": ["WebGL / Three.js", "Creative Coding", "Headless CMS"] },
+        { "id": "03", "title": "Branding", "list": ["Identity", "Strategy", "Guidelines"] },
+        { "id": "04", "title": "SEO & Perf", "list": ["Technical SEO", "Core Web Vitals", "Optimization"] }
     ],
-    "featured_projects": [
-        {
-            "id": "proj-01",
-            "title": "Aether Spirits",
-            "client": "Aether Inc.",
-            "description": "E-Commerce",
-            "image": {
-                "url": "./assets/img/hero-texture.webp",
-                "displacementMap": "./assets/img/disp-map.jpg",
-                "intensity": 0.4
-            },
-            "tags": ["WebGL", "E-Shop"],
-            "link": "/project/aether"
-        },
-        {
-            "id": "proj-02",
-            "title": "Chronos Watch",
-            "client": "Horlogerie Suisse",
-            "description": "Showcase",
-            "image": {
-                "url": "./assets/img/hero-texture.webp",
-                "displacementMap": "./assets/img/disp-map.jpg",
-                "intensity": 0.5
-            },
-            "tags": ["3D", "Luxury"],
-            "link": "/project/chronos"
-        },
-        {
-            "id": "proj-03",
-            "title": "Velvet Mode",
-            "client": "Maison Velvet",
-            "description": "Portfolio",
-            "image": {
-                "url": "./assets/img/hero-texture.webp",
-                "displacementMap": "./assets/img/disp-map.jpg",
-                "intensity": 0.3
-            },
-            "tags": ["Fashion", "Minimal"],
-            "link": "/project/velvet"
-        },
-        {
-            "id": "proj-04",
-            "title": "Apex Arch",
-            "client": "Apex Studio",
-            "description": "Corporate",
-            "image": {
-                "url": "./assets/img/hero-texture.webp",
-                "displacementMap": "./assets/img/disp-map.jpg",
-                "intensity": 0.3
-            },
-            "tags": ["Architecture", "B2B"],
-            "link": "/project/apex"
-        }
+    "projects": [
+        { "title": "Aether Spirits", "client": "Aether Inc.", "services": "WebGL / E-Commerce", "year": "2024", "image": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop" },
+        { "title": "Chronos Watch", "client": "Horlogerie Suisse", "services": "3D Showcase", "year": "2023", "image": "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2670&auto=format&fit=crop" },
+        { "title": "Velvet Mode", "client": "Maison Velvet", "services": "Portfolio / Minimal", "year": "2023", "image": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop" },
+        { "title": "Apex Arch", "client": "Apex Studio", "services": "Corporate", "year": "2022", "image": "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2670&auto=format&fit=crop" }
     ],
     "footer": {
         "title": "Let's Create\nTogether.",
         "email": "hello@logoloom.com",
-        "cta": "Start a Project",
-        "socials": [
-            { "name": "Instagram", "url": "#" },
-            { "name": "Twitter", "url": "#" },
-            { "name": "Awwwards", "url": "#" },
-            { "name": "LinkedIn", "url": "#" }
-        ]
+        "cta": "Start Project"
     }
 }
