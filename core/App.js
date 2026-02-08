@@ -26,7 +26,7 @@ class App {
             const response = await fetch('./data/data.json');
             this.data = await response.json();
 
-            // 2. Build DOM (Simple placeholder for now)
+            // 2. Build DOM
             this.buildDOM();
 
         } catch (error) {
@@ -34,6 +34,7 @@ class App {
         }
 
         // 3. Init WebGL
+        // We pass the data to WebGLManager if needed, but it will read from DOM
         this.webglManager.init();
 
         // 4. Init Lenis (Smooth Scroll)
@@ -68,7 +69,7 @@ class App {
 
         const h1 = document.createElement('h1');
         h1.className = 'hero-title';
-        h1.innerHTML = heroData.title.replace(/\n/g, '<br>'); // Handle line breaks
+        h1.innerHTML = heroData.title.replace(/\n/g, '<br>');
 
         const subtitle = document.createElement('p');
         subtitle.className = 'hero-subtitle';
@@ -76,7 +77,7 @@ class App {
 
         const cta = document.createElement('a');
         cta.className = 'hero-cta';
-        cta.href = '#projects'; // Internal anchor for now
+        cta.href = '#projects';
         cta.innerText = heroData.cta;
 
         heroContent.appendChild(h1);
@@ -89,14 +90,10 @@ class App {
 
         const img = document.createElement('img');
         img.className = 'hero-image';
-        // Set crossOrigin BEFORE src
         img.crossOrigin = "anonymous";
         img.src = heroData.image.url;
         img.alt = heroData.title;
-        // Data attributes for Curtains
         img.dataset.sampler = "planeTexture";
-        // Store displacement map info if needed by WebGLManager directly,
-        // though WebGLManager will likely read from JSON config passed to it.
 
         imageWrapper.appendChild(img);
 
@@ -105,8 +102,57 @@ class App {
 
         main.appendChild(heroSection);
 
-        // --- Services & Projects (Placeholders for now) ---
-        // (Will be implemented in next phases)
+        // --- Projects Section ---
+        if (this.data.featured_projects && this.data.featured_projects.length > 0) {
+            const projectsSection = document.createElement('section');
+            projectsSection.className = 'projects-section container';
+            projectsSection.id = 'projects';
+
+            const projectsList = document.createElement('div');
+            projectsList.className = 'projects-list';
+
+            this.data.featured_projects.forEach((proj, index) => {
+                const item = document.createElement('a');
+                item.className = 'project-item';
+                item.href = proj.link || '#';
+                item.dataset.id = proj.id;
+
+                // Index
+                const idx = document.createElement('span');
+                idx.className = 'project-index';
+                idx.innerText = `0${index + 1}.`;
+
+                // Title
+                const title = document.createElement('h2');
+                title.className = 'project-title';
+                title.innerText = proj.title;
+
+                // Tags
+                const tags = document.createElement('div');
+                tags.className = 'project-tags';
+                tags.innerText = proj.tags.join(' / ');
+
+                // Hidden GL Image
+                // IMPORTANT: opacity: 0 and position: absolute via CSS class
+                const glImg = document.createElement('img');
+                glImg.className = 'project-gl-image';
+                glImg.crossOrigin = "anonymous";
+                glImg.src = proj.image.url;
+                glImg.alt = proj.title;
+                glImg.dataset.displacement = proj.image.displacementMap;
+                glImg.dataset.intensity = proj.image.intensity;
+
+                item.appendChild(idx);
+                item.appendChild(title);
+                item.appendChild(tags);
+                item.appendChild(glImg);
+
+                projectsList.appendChild(item);
+            });
+
+            projectsSection.appendChild(projectsList);
+            main.appendChild(projectsSection);
+        }
     }
 
     initLenis() {
@@ -123,9 +169,10 @@ class App {
             touchMultiplier: 2,
         });
 
-        // Sync Scroll to WebGL
         this.lenis.on('scroll', ({ scroll }) => {
-            this.webglManager.updateScroll(scroll);
+            if (this.webglManager) {
+                this.webglManager.updateScroll(scroll);
+            }
         });
     }
 
@@ -148,21 +195,16 @@ class App {
     onResize() {
         clearTimeout(this.resizeTimeout);
         this.resizeTimeout = setTimeout(() => {
-            console.log('Debounced Resize');
-
             if (this.webglManager) {
                 this.webglManager.resize();
             }
-
             if (window.ScrollTrigger) {
                 window.ScrollTrigger.refresh();
             }
-
         }, 100);
     }
 }
 
-// Start App
 window.addEventListener('DOMContentLoaded', () => {
     new App();
 });

@@ -21,14 +21,15 @@ export default class WebGLManager {
             document.body.classList.add("no-curtains");
         });
 
-        // Initialize specific planes
-        this.initHeroPlane();
-
         // Global Mouse Events
         window.addEventListener("mousemove", (e) => {
             this.mouse.x = e.clientX;
             this.mouse.y = e.clientY;
         });
+
+        // Initialize Planes
+        this.initHeroPlane();
+        this.initProjects();
     }
 
     async initHeroPlane() {
@@ -39,12 +40,10 @@ export default class WebGLManager {
              return;
         }
 
-        // Ensure crossOrigin is set
         heroImage.crossOrigin = "anonymous";
 
         // Manually force load logic
         const imgUrl = heroImage.src;
-        // Reset src to trigger load if it was cached or weird state
         heroImage.src = "";
         heroImage.src = imgUrl;
 
@@ -61,7 +60,6 @@ export default class WebGLManager {
         });
 
         try {
-            // Load shader code
             const [vs, fs] = await Promise.all([
                 fetch('./shaders/plane.vert').then(r => r.text()),
                 fetch('./shaders/plane.frag').then(r => r.text())
@@ -86,6 +84,11 @@ export default class WebGLManager {
                         type: "1f",
                         value: 0.04,
                     },
+                    uAlpha: {
+                        name: "uAlpha",
+                        type: "1f",
+                        value: 1.0, // Hero starts visible
+                    }
                 },
             };
 
@@ -93,19 +96,96 @@ export default class WebGLManager {
 
             if (plane) {
                 plane.onRender(() => {
-                    // Update uniforms
                     plane.uniforms.uTime.value++;
-
-                    // Map mouse position to plane coordinates
                     const mousePos = plane.mouseToPlaneCoords(this.mouse.x, this.mouse.y);
                     plane.uniforms.uMousePosition.value = [mousePos.x, mousePos.y];
                 });
-            } else {
-                console.error('Failed to create plane. Check if image is loaded and valid.');
             }
 
         } catch (error) {
-            console.error('Error loading shaders:', error);
+            console.error('Error loading shaders for hero:', error);
+        }
+    }
+
+    async initProjects() {
+        // Wait for DOM to be built - usually called after buildDOM
+        // Use a slight delay or rely on execution order (init is called after buildDOM in App.js)
+
+        const projectImages = document.querySelectorAll('.project-gl-image');
+        if (projectImages.length === 0) return;
+
+        try {
+            const [vs, fs] = await Promise.all([
+                fetch('./shaders/plane.vert').then(r => r.text()),
+                fetch('./shaders/plane.frag').then(r => r.text())
+            ]);
+
+            projectImages.forEach((img, index) => {
+                // Ensure image is loaded before adding plane? Curtains handles it but safer to wait or just add.
+                // We'll trust Curtains to handle the texture loading from the img tag.
+
+                const params = {
+                    vertexShader: vs,
+                    fragmentShader: fs,
+                    widthSegments: 20,
+                    heightSegments: 20,
+                    uniforms: {
+                        uTime: {
+                            name: "uTime",
+                            type: "1f",
+                            value: 0,
+                        },
+                        uMousePosition: {
+                            name: "uMousePosition",
+                            type: "2f",
+                            value: [0, 0],
+                        },
+                        uMouseStrength: {
+                            name: "uMouseStrength",
+                            type: "1f",
+                            value: 0.0, // Start with no distortion
+                        },
+                        uAlpha: {
+                            name: "uAlpha",
+                            type: "1f",
+                            value: 0.0, // Start invisible
+                        }
+                    },
+                };
+
+                // The plane is attached to the img element (which covers the project item)
+                const plane = this.curtains.addPlane(img, params);
+
+                if (plane) {
+                    const parentItem = img.closest('.project-item');
+
+                    // Interaction
+                    if (parentItem) {
+                        parentItem.addEventListener('mouseenter', () => {
+                            if (window.gsap) {
+                                window.gsap.to(plane.uniforms.uAlpha, { value: 1, duration: 0.5 });
+                                window.gsap.to(plane.uniforms.uMouseStrength, { value: 0.1, duration: 0.5, ease: "power2.out" });
+                            }
+                        });
+
+                        parentItem.addEventListener('mouseleave', () => {
+                            if (window.gsap) {
+                                window.gsap.to(plane.uniforms.uAlpha, { value: 0, duration: 0.5 });
+                                window.gsap.to(plane.uniforms.uMouseStrength, { value: 0.0, duration: 0.5 });
+                            }
+                        });
+                    }
+
+                    plane.onRender(() => {
+                        plane.uniforms.uTime.value++;
+                        const mousePos = plane.mouseToPlaneCoords(this.mouse.x, this.mouse.y);
+                        plane.uniforms.uMousePosition.value = [mousePos.x, mousePos.y];
+                    });
+                }
+            });
+
+        } catch (error) {
+            console.error('Error loading shaders for projects:', error);
         }
     }
 
