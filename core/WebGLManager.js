@@ -2,10 +2,10 @@ export default class WebGLManager {
     constructor() {
         this.curtains = null;
         this.scrollOffset = 0;
+        this.mouse = { x: 0, y: 0 };
     }
 
     init() {
-        // Initialisation de Curtains.js
         if (!window.Curtains) {
             console.error('Curtains.js not found');
             return;
@@ -13,15 +13,75 @@ export default class WebGLManager {
 
         this.curtains = new window.Curtains({
             container: "canvas",
-            watchScroll: false, // Désactivé pour synchronisation manuelle avec Lenis
-            pixelRatio: Math.min(1.5, window.devicePixelRatio) // Perf optimization
+            watchScroll: false, // Sync manually via Lenis
+            pixelRatio: Math.min(1.5, window.devicePixelRatio) // Performance optimization
         });
 
         this.curtains.onError(() => {
             document.body.classList.add("no-curtains");
         });
 
+        // Initialize specific planes
+        this.initHeroPlane();
+
+        // Global Mouse Events
+        window.addEventListener("mousemove", (e) => {
+            this.mouse.x = e.clientX;
+            this.mouse.y = e.clientY;
+        });
+
         console.log('WebGL Manager Initialized');
+    }
+
+    async initHeroPlane() {
+        const heroImage = document.querySelector('.hero-image');
+        if (!heroImage) return;
+
+        try {
+            // Load shader code
+            const [vs, fs] = await Promise.all([
+                fetch('./shaders/plane.vert').then(r => r.text()),
+                fetch('./shaders/plane.frag').then(r => r.text())
+            ]);
+
+            const params = {
+                vertexShader: vs,
+                fragmentShader: fs,
+                uniforms: {
+                    uTime: {
+                        name: "uTime",
+                        type: "1f",
+                        value: 0,
+                    },
+                    uMousePosition: {
+                        name: "uMousePosition",
+                        type: "2f",
+                        value: [0, 0],
+                    },
+                    uMouseStrength: {
+                        name: "uMouseStrength",
+                        type: "1f",
+                        value: 0.04,
+                    },
+                },
+            };
+
+            const plane = this.curtains.addPlane(heroImage, params);
+
+            if (plane) {
+                plane.onRender(() => {
+                    // Update uniforms
+                    plane.uniforms.uTime.value++;
+
+                    // Map mouse position to plane coordinates
+                    const mousePos = plane.mouseToPlaneCoords(this.mouse.x, this.mouse.y);
+                    plane.uniforms.uMousePosition.value = [mousePos.x, mousePos.y];
+                });
+            }
+
+        } catch (error) {
+            console.error('Error loading shaders:', error);
+        }
     }
 
     render() {
@@ -39,14 +99,7 @@ export default class WebGLManager {
 
     resize() {
         if (this.curtains) {
-            // Recalculer les tailles des plans
             this.curtains.resize();
         }
-    }
-
-    // Méthode pour ajouter des plans
-    addPlane(element, params) {
-        if (!this.curtains) return null;
-        return this.curtains.addPlane(element, params);
     }
 }

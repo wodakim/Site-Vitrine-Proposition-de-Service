@@ -57,19 +57,57 @@ class App {
     }
 
     buildDOM() {
-        // Logique de génération du DOM à partir de this.data
-        // À implémenter : Injecter le contenu dans <main id="barba-wrapper">
         const main = document.querySelector('main');
-        if (main && this.data) {
-            // Exemple basique : Titre Hero
-            const h1 = document.createElement('h1');
-            h1.innerText = this.data.hero_section.title;
-            // main.appendChild(h1);
-            // Note: Pour l'instant on laisse le HTML vide ou on le remplira dynamiquement plus tard.
-            // Le prompt demandait "Au chargement, le JS lit le data.json et génère le DOM à la volée."
-            // Je vais laisser cette partie pour l'intégration visuelle,
-            // mais la structure est là.
-        }
+        if (!main || !this.data) return;
+
+        // --- Hero Section ---
+        const heroData = this.data.hero_section;
+        const heroSection = document.createElement('section');
+        heroSection.className = 'hero-section';
+
+        // Hero Content
+        const heroContent = document.createElement('div');
+        heroContent.className = 'hero-content container';
+
+        const h1 = document.createElement('h1');
+        h1.className = 'hero-title';
+        h1.innerHTML = heroData.title.replace(/\n/g, '<br>'); // Handle line breaks
+
+        const subtitle = document.createElement('p');
+        subtitle.className = 'hero-subtitle';
+        subtitle.innerText = heroData.subtitle;
+
+        const cta = document.createElement('a');
+        cta.className = 'hero-cta';
+        cta.href = '#projects'; // Internal anchor for now
+        cta.innerText = heroData.cta;
+
+        heroContent.appendChild(h1);
+        heroContent.appendChild(subtitle);
+        heroContent.appendChild(cta);
+
+        // Hero Image (Hidden for WebGL)
+        const imageWrapper = document.createElement('div');
+        imageWrapper.className = 'hero-image-wrapper';
+
+        const img = document.createElement('img');
+        img.className = 'hero-image';
+        img.src = heroData.image.url;
+        img.alt = heroData.title;
+        // Data attributes for Curtains
+        img.dataset.sampler = "planeTexture";
+        // Store displacement map info if needed by WebGLManager directly,
+        // though WebGLManager will likely read from JSON config passed to it.
+
+        imageWrapper.appendChild(img);
+
+        heroSection.appendChild(imageWrapper);
+        heroSection.appendChild(heroContent);
+
+        main.appendChild(heroSection);
+
+        // --- Services & Projects (Placeholders for now) ---
+        // (Will be implemented in next phases)
     }
 
     initLenis() {
