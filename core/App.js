@@ -21,6 +21,10 @@ class App {
     }
 
     async init() {
+        // 0. Ensure main content is hidden for smooth reveal to prevent jitter
+        const main = document.querySelector('main');
+        if (main) main.style.opacity = '0';
+
         // 1. Fetch Data
         try {
             const response = await fetch('./data/data.json');
@@ -38,8 +42,8 @@ class App {
         }
 
         // 4. Init WebGL
-        // We pass the data to WebGLManager if needed, but it will read from DOM
-        this.webglManager.init();
+        // Wait for WebGL to be fully initialized (textures loaded) before revealing
+        await this.webglManager.init();
 
         // 5. Init Lenis (Smooth Scroll)
         this.initLenis();
@@ -54,8 +58,28 @@ class App {
         // 8. Event Listeners
         window.addEventListener('resize', this.onResize.bind(this));
 
-        // Hide Loader
-        this.loader.hide();
+        // 9. Hide Loader & Reveal Content
+        await this.loader.hide();
+
+        if (main) {
+            if (window.gsap) {
+                // Smooth reveal
+                window.gsap.to(main, {
+                    opacity: 1,
+                    duration: 0.8,
+                    ease: "power2.out",
+                    onComplete: () => {
+                        // Recalculate ScrollTrigger positions after content is visible
+                        if (window.ScrollTrigger) window.ScrollTrigger.refresh();
+                    }
+                });
+            } else {
+                main.style.transition = 'opacity 0.8s ease';
+                main.style.opacity = '1';
+                // Fallback refresh
+                if (window.ScrollTrigger) window.ScrollTrigger.refresh();
+            }
+        }
     }
 
     buildDOM() {

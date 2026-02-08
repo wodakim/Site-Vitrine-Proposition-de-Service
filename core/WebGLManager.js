@@ -5,7 +5,7 @@ export default class WebGLManager {
         this.mouse = { x: 0, y: 0 };
     }
 
-    init() {
+    async init() {
         if (!window.Curtains) {
             console.error('Curtains.js not found');
             return;
@@ -28,8 +28,10 @@ export default class WebGLManager {
         });
 
         // Initialize Planes
-        this.initHeroPlane();
-        this.initProjects();
+        await Promise.all([
+            this.initHeroPlane(),
+            this.initProjects()
+        ]);
     }
 
     async initHeroPlane() {
