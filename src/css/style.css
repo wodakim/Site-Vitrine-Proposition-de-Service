@@ -857,11 +857,19 @@ body.custom-cursor-active * {
     transition: all 0.5s ease 0.4s;
     position: relative;
     z-index: 10003;
+    cursor: pointer;
+    pointer-events: auto; /* Ensure clickable */
+}
+
+.g-label:hover {
+    text-shadow: 0 0 20px currentColor;
+    transform: scale(1.05);
 }
 
 #garganta-portal.active .g-label {
-    opacity: 1;
-    transform: translateY(0);
+    /* Opacity managed by JS now (fade in on full open) */
+    /* opacity: 1; */
+    /* transform: translateY(0); */
 }
 
 /* Blur Background */
