@@ -778,98 +778,97 @@ body.custom-cursor-active * {
 }
 
 
-/* GARGANTA PORTAL (INTERDIMENSIONAL TEAR) */
-/* Replaced with user-provided styles from garganta.html */
+/* GARGANTA PORTAL V2 (INTERDIMENSIONAL TEAR) */
 #garganta-portal {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    /* Ensure z-index is below the cursor (which is 20000) */
     z-index: 10000;
-    display: none; /* Controlled by JS */
+    display: none;
     justify-content: center;
     align-items: center;
-    pointer-events: none; /* Default pass-through */
+    pointer-events: none;
 }
 
 #garganta-portal.active {
     display: flex;
-    pointer-events: auto; /* Block interactions when active */
-    background: rgba(0, 0, 0, 0.7); /* Dim background */
+    pointer-events: auto;
+    background: linear-gradient(to bottom, rgba(2, 2, 5, 0.8), rgba(10, 10, 18, 0.8)); /* Sky from V2 */
     backdrop-filter: blur(5px);
     transition: background 0.5s ease;
 }
 
-#garganta-stage {
+#scene {
     position: relative;
     width: 100vw;
     height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    pointer-events: none;
 }
 
-/* The Void itself */
-#garganta-void {
+.garganta-wrapper {
     position: absolute;
-    /* Initial size managed by JS */
-    width: 10px;
-    height: 2px;
-    background-color: #000000;
-    cursor: pointer;
-    pointer-events: auto; /* Make the void clickable */
-
-    /* The Glow - Exact match from garganta.html */
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* NEON GLOW V2 */
     filter:
-        drop-shadow(0 0 5px rgba(0, 100, 255, 0.8))
-        drop-shadow(0 0 15px rgba(0, 255, 255, 0.6))
-        drop-shadow(0 0 30px rgba(138, 43, 226, 0.4));
-
-    /* Performance optimization */
-    will-change: clip-path, width, height, transform;
-    z-index: 10002;
+        drop-shadow(0 0 2px rgba(0, 255, 255, 0.8))
+        drop-shadow(0 0 8px rgba(0, 150, 255, 0.5))
+        drop-shadow(0 0 20px rgba(0, 50, 200, 0.3));
+    z-index: 10;
 }
 
-/* Particles (Reiatsu) */
+#void {
+    background-color: #000;
+    width: 80vw;
+    height: 60vh;
+    /* Initial state set by JS */
+    transition: transform 0.1s;
+    cursor: pointer;
+    pointer-events: auto;
+    will-change: clip-path, width, height;
+}
+
+/* Particles (Reiatsu V2) */
 .particle {
     position: absolute;
-    background: cyan;
-    border-radius: 50%;
+    background: rgba(0, 255, 255, 0.8);
     pointer-events: none;
-    opacity: 0;
-    z-index: 10001;
-    mix-blend-mode: screen;
+    box-shadow: 0 0 4px cyan;
+    z-index: 5;
 }
 
+/* Label Centered */
 .g-label {
-    margin-top: 50px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
     font-family: 'Space Mono', monospace;
     font-size: 1.2rem;
     letter-spacing: 0.5em;
     text-transform: uppercase;
     color: var(--text-color);
     text-shadow: 0 0 10px currentColor;
+
     opacity: 0;
-    transform: translateY(20px);
-    transition: all 0.5s ease 0.4s;
-    position: relative;
-    z-index: 10003;
+    transition: opacity 0.5s ease;
+    z-index: 20; /* Above void */
     cursor: pointer;
-    pointer-events: auto; /* Ensure clickable */
+    pointer-events: none; /* Initially none */
+    white-space: nowrap;
 }
 
 .g-label:hover {
     text-shadow: 0 0 20px currentColor;
-    transform: scale(1.05);
-}
-
-#garganta-portal.active .g-label {
-    /* Opacity managed by JS now (fade in on full open) */
-    /* opacity: 1; */
-    /* transform: translateY(0); */
+    transform: translate(-50%, -50%) scale(1.1); /* Keep centered on hover scale */
 }
 
 /* Blur Background */
