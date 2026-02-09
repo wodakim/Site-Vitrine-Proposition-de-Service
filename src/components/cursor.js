@@ -15,7 +15,7 @@ export default class Cursor {
 
         this.points = [];
         this.nPoints = 20; // Number of segments in the thread
-        this.stiffness = 0.1;
+        this.stiffness = 0.15; // Increased slightly for tighter trail
         this.damping = 0.8;
 
         this.isHovering = false;
@@ -38,6 +38,8 @@ export default class Cursor {
         this.canvas.style.pointerEvents = 'none';
         this.canvas.style.zIndex = '9998'; // Below noise
         this.canvas.style.mixBlendMode = 'difference';
+        this.canvas.style.opacity = '0'; // Hidden initially
+        this.canvas.style.transition = 'opacity 0.5s ease';
 
         document.body.appendChild(this.canvas);
 
@@ -46,6 +48,20 @@ export default class Cursor {
     }
 
     bindEvents() {
+        // Activate Custom Cursor on First Click
+        const activateCursor = () => {
+            this.canvas.style.opacity = '1';
+            document.body.classList.add('custom-cursor-active');
+            window.removeEventListener('click', activateCursor);
+
+            // Sync initial position immediately
+            this.points.forEach(p => {
+                p.x = this.mouse.x;
+                p.y = this.mouse.y;
+            });
+        };
+        window.addEventListener('click', activateCursor);
+
         window.addEventListener('resize', () => {
             this.width = window.innerWidth;
             this.height = window.innerHeight;
@@ -64,7 +80,7 @@ export default class Cursor {
             if (el) {
                 this.isHovering = true;
                 this.activeElement = el;
-                this.stiffness = 0.2;
+                this.stiffness = 0.25;
             }
         });
 
@@ -73,7 +89,7 @@ export default class Cursor {
              if (el) {
                  this.isHovering = false;
                  this.activeElement = null;
-                 this.stiffness = 0.1;
+                 this.stiffness = 0.15;
              }
         });
     }
@@ -92,9 +108,9 @@ export default class Cursor {
         // Physics: Head follows target (Mouse or Element)
         let head = this.points[0];
 
-        // Lerp head position
-        head.x += (this.target.x - head.x) * (this.isHovering ? 0.15 : 0.25);
-        head.y += (this.target.y - head.y) * (this.isHovering ? 0.15 : 0.25);
+        // Lerp head position - Increased for better responsiveness (was 0.25)
+        head.x += (this.target.x - head.x) * (this.isHovering ? 0.2 : 0.6);
+        head.y += (this.target.y - head.y) * (this.isHovering ? 0.2 : 0.6);
 
         // Tail points (Verlet-ish / Spring Chain)
         for (let i = 1; i < this.nPoints; i++) {

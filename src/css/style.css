@@ -407,7 +407,8 @@ a.project-row {
     opacity: 1;
 }
 
-/* Hide default cursor */
-body, a {
+/* Custom Cursor State */
+body.custom-cursor-active,
+body.custom-cursor-active * {
     cursor: none !important;
 }
