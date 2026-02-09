@@ -35,7 +35,7 @@ export default class Cursor {
         this.canvas.style.width = '100%';
         this.canvas.style.height = '100%';
         this.canvas.style.pointerEvents = 'none';
-        this.canvas.style.zIndex = '9998'; // Below noise
+        this.canvas.style.zIndex = '20000'; // Above everything, including Garganta
         this.canvas.style.mixBlendMode = 'difference';
         this.canvas.style.opacity = '0'; // Hidden initially
         this.canvas.style.transition = 'opacity 0.5s ease';

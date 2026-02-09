@@ -1,219 +1,255 @@
 
 export default class TransitionManager {
-    constructor(onComplete) {
-        this.onComplete = onComplete;
-        this.isAnimating = false;
-        this.direction = null;
-        this.particles = [];
-        this.particleSystemRunning = false;
+    constructor() {
+        this.portal = null;
+        this.voidElement = null;
+        this.stage = null;
+        this.isActive = false;
+        this.onComplete = null;
 
-        // Audio
-        this.audio = new Audio('src/assets/audio/bleach-garganta.mp3');
+        // State configuration from user's garganta.html
+        this.state = {
+            opening: false,
+            entering: false,
+            currentWidth: 0,
+            currentHeight: 0,
+            maxWidth: window.innerWidth * 1.2,
+            maxHeight: window.innerHeight * 0.3,
+            openingSpeed: 0.02,
+            progress: 0,
+            noiseIntensity: 15
+        };
+
+        this.animationId = null;
+        this.audio = null;
+
+        // Bind methods
+        this.animateFrame = this.animateFrame.bind(this);
+        this.handleResize = this.handleResize.bind(this);
+        this.enterGate = this.enterGate.bind(this);
+
+        this.init();
+    }
+
+    init() {
+        // Create DOM Structure
+        // <div id="garganta-portal">
+        //   <div id="garganta-stage">
+        //     <div id="garganta-void"></div>
+        //   </div>
+        // </div>
+
+        const portal = document.createElement('div');
+        portal.id = 'garganta-portal';
+
+        const stage = document.createElement('div');
+        stage.id = 'garganta-stage';
+
+        const voidEl = document.createElement('div');
+        voidEl.id = 'garganta-void';
+
+        stage.appendChild(voidEl);
+        portal.appendChild(stage);
+        document.body.appendChild(portal);
+
+        this.portal = portal;
+        this.stage = stage;
+        this.voidElement = voidEl;
+
+        // Interaction
+        this.voidElement.addEventListener('click', this.enterGate);
+
+        // Audio Setup
+        this.audio = new Audio('assets/audio/bleach-garganta.mp3');
         this.audio.volume = 0.5;
 
-        // Bind
-        this.start = this.start.bind(this);
-        this.enterGate = this.enterGate.bind(this);
-        this.resolve = this.resolve.bind(this);
-        this.animateParticles = this.animateParticles.bind(this);
-        this.resizeCanvas = this.resizeCanvas.bind(this);
-
-        this.createPortal();
+        // Listeners
+        window.addEventListener('resize', this.handleResize);
     }
 
-    createPortal() {
-        this.overlay = document.createElement('div');
-        this.overlay.id = 'garganta-portal';
-
-        this.overlay.innerHTML = `
-            <div class="g-void-container">
-                <div class="g-void-wrapper">
-                    <div class="g-void"></div>
-                </div>
-                <canvas id="reiatsu-canvas"></canvas>
-                <div class="g-label">OUVRIR LA BRECHE</div>
-            </div>
-        `;
-
-        document.body.appendChild(this.overlay);
-
-        // Canvas setup
-        this.canvas = this.overlay.querySelector('#reiatsu-canvas');
-        this.ctx = this.canvas.getContext('2d');
-
-        // Click Listener on the VOID (the tear itself)
-        const voidEl = this.overlay.querySelector('.g-void');
-        voidEl.addEventListener('click', this.enterGate);
+    handleResize() {
+        this.state.maxWidth = window.innerWidth * 1.2;
+        this.state.maxHeight = window.innerHeight * 0.3;
     }
 
-    generateJaggedPoly() {
-        // Generate a jagged vertical slit -> opens to jagged oval
-        const numPoints = 120; // High detail
-        const points = [];
-        const centerX = 50;
-        const centerY = 50;
-        const radiusX = 45; // Width %
-        const radiusY = 35; // Height %
-
-        for (let i = 0; i < numPoints; i++) {
-            const angle = (i / numPoints) * Math.PI * 2;
-
-            // Base oval
-            const rX = radiusX * Math.cos(angle);
-            const rY = radiusY * Math.sin(angle);
-
-            // Noise: varies between -5% and +5% of the radius
-            // Use Math.random() directly
-            const noiseFactor = 1 + (Math.random() - 0.5) * 0.15; // 15% noise
-
-            // Apply noise
-            const x = centerX + (rX * noiseFactor);
-            const y = centerY + (rY * noiseFactor);
-
-            points.push(`${x.toFixed(1)}% ${y.toFixed(1)}%`);
-        }
-
-        return `polygon(${points.join(', ')})`;
-    }
-
-    start(direction) {
-        if (this.isAnimating) return;
-        this.isAnimating = true;
-        this.direction = direction; // 'toRetro' or 'toStandard'
-
-        // 1. Play Sound
-        try {
+    playAudio() {
+        if (this.audio) {
             this.audio.currentTime = 0;
-            this.audio.play().catch(e => console.log("Audio Play Failed:", e));
-        } catch (e) { console.warn("Audio error:", e); }
-
-        // 2. Set Colors & Content
-        const voidEl = this.overlay.querySelector('.g-void');
-        const labelEl = this.overlay.querySelector('.g-label');
-
-        // Generate new random shape
-        const poly = this.generateJaggedPoly();
-        voidEl.style.clipPath = poly;
-
-        if (direction === 'toRetro') {
-            // Standard -> Retro (Blue/Cyan)
-            voidEl.style.setProperty('--portal-glow', '#00eaff'); // Cyan
-            voidEl.style.setProperty('--portal-glow-secondary', '#2c2cff'); // Blue
-            labelEl.innerText = "INITIALISER LE SYSTEME";
-            labelEl.style.color = "#00eaff";
-            this.particleColor = '0, 234, 255'; // RGB for particles
-        } else {
-            // Retro -> Standard (Red/Orange/Violet)
-            voidEl.style.setProperty('--portal-glow', '#ff0055'); // Magenta/Red
-            voidEl.style.setProperty('--portal-glow-secondary', '#ff4400'); // Orange
-            labelEl.innerText = "RETOUR A LA REALITE";
-            labelEl.style.color = "#ff0055";
-            this.particleColor = '255, 0, 85';
+            this.audio.play().catch(e => console.log("Audio autoplay prevented", e));
         }
-
-        // 3. Open Portal
-        this.overlay.classList.add('active');
-        document.getElementById('app').classList.add('blur-transition');
-
-        // Start Particles
-        this.resizeCanvas();
-        this.particleSystemRunning = true;
-        this.animateParticles();
-
-        window.addEventListener('resize', this.resizeCanvas);
     }
 
-    resizeCanvas() {
-        if (!this.canvas) return;
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight;
-    }
+    startTransition(callback) {
+        console.log("Starting Garganta Transition (User Version)");
+        this.onComplete = callback;
+        this.portal.classList.add('active');
+        this.isActive = true;
 
-    animateParticles() {
-        if (!this.particleSystemRunning) return;
+        // Reset State for Opening
+        this.state.opening = true;
+        this.state.entering = false;
+        this.state.progress = 0;
+        this.state.currentWidth = 0;
+        this.state.currentHeight = 0;
 
-        const ctx = this.ctx;
-        const w = this.canvas.width;
-        const h = this.canvas.height;
+        // Reset Visuals
+        this.stage.style.transform = 'scale(1)';
+        this.stage.style.opacity = '1';
+        this.stage.style.transition = 'none';
 
-        // Clear frame
-        ctx.clearRect(0, 0, w, h);
+        this.playAudio();
 
-        // Emit new particles
-        if (this.particles.length < 200) {
-            // Emit from center area
-            const angle = Math.random() * Math.PI * 2;
-            const dist = 50 + Math.random() * 100; // Start slightly outside center
-
-            this.particles.push({
-                x: w/2 + (Math.cos(angle) * dist * 0.2), // Start close to center
-                y: h/2 + (Math.sin(angle) * dist * 0.5),
-                vx: (Math.cos(angle) * (2 + Math.random() * 4)),
-                vy: (Math.sin(angle) * (2 + Math.random() * 4)),
-                life: 1.0,
-                decay: 0.01 + Math.random() * 0.02,
-                size: 1 + Math.random() * 3
-            });
-        }
-
-        // Update & Draw
-        ctx.fillStyle = `rgba(${this.particleColor}, 1)`;
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = `rgba(${this.particleColor}, 0.8)`;
-
-        for (let i = this.particles.length - 1; i >= 0; i--) {
-            const p = this.particles[i];
-
-            p.x += p.vx;
-            p.y += p.vy;
-            p.life -= p.decay;
-
-            if (p.life <= 0) {
-                this.particles.splice(i, 1);
-                continue;
-            }
-
-            ctx.globalAlpha = p.life;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-            ctx.fill();
-        }
-        ctx.globalAlpha = 1;
-
-        requestAnimationFrame(this.animateParticles);
+        // Start Animation Loop
+        if (this.animationId) cancelAnimationFrame(this.animationId);
+        this.animateFrame();
     }
 
     enterGate() {
+        if (this.state.entering) return; // Prevent double click
+        this.state.entering = true;
         console.log("Entering Garganta...");
 
-        const voidEl = this.overlay.querySelector('.g-void');
-        voidEl.classList.add('entering'); // Triggers massive zoom
+        // Visual "Enter" Effect: Massive Zoom into the void
+        this.stage.style.transition = 'transform 1s cubic-bezier(0.7, 0, 0.2, 1), opacity 0.5s ease 0.8s';
+        this.stage.style.transform = 'scale(50)'; // Zoom in
+        this.stage.style.opacity = '0'; // Fade out at end
 
-        // 4. Trigger State Change mid-zoom
+        // Complete transition after zoom
         setTimeout(() => {
-            if (this.onComplete) this.onComplete(this.direction);
-
-            // 5. Resolve
-            this.resolve();
-
+            this.completeTransition();
         }, 800);
     }
 
-    resolve() {
-        console.log("Resolving Transition...");
+    completeTransition() {
+        if (this.onComplete) this.onComplete();
 
-        // Hide overlay with fade
-        this.overlay.classList.add('fading');
-        document.getElementById('app').classList.remove('blur-transition');
-
+        // Cleanup / Hide
         setTimeout(() => {
-            // Reset State
-            this.overlay.classList.remove('active', 'fading');
-            this.overlay.querySelector('.g-void').classList.remove('entering');
-            this.isAnimating = false;
-            this.particleSystemRunning = false;
-            this.particles = [];
-            window.removeEventListener('resize', this.resizeCanvas);
-        }, 1000);
+            this.portal.classList.remove('active');
+            this.isActive = false;
+            cancelAnimationFrame(this.animationId);
+
+            // Clear any lingering particles
+            const particles = document.querySelectorAll('.particle');
+            particles.forEach(p => p.remove());
+        }, 500);
+    }
+
+    // --- Animation Logic from garganta.html ---
+
+    random(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+
+    generateJaggedPolygon(width, height, noiseLevel) {
+        const points = [];
+        const numPoints = 80;
+        const centerX = width / 2;
+        const centerY = height / 2;
+
+        for (let i = 0; i < numPoints; i++) {
+            const angle = (i / numPoints) * (Math.PI * 2);
+            const baseX = Math.cos(angle) * (width / 2);
+            const baseY = Math.sin(angle) * (height / 2);
+
+            // Noise logic from user code
+            const horizontalFactor = Math.abs(Math.sin(angle));
+            const noiseX = this.random(-noiseLevel, noiseLevel) * horizontalFactor;
+            const noiseY = this.random(-noiseLevel, noiseLevel);
+
+            const xPct = ((centerX + baseX + noiseX) / width) * 100;
+            const yPct = ((centerY + baseY + noiseY) / height) * 100;
+
+            points.push(`${xPct.toFixed(2)}% ${yPct.toFixed(2)}%`);
+        }
+        return `polygon(${points.join(',')})`;
+    }
+
+    spawnParticle() {
+        const p = document.createElement('div');
+        p.classList.add('particle');
+        this.stage.appendChild(p); // Append to stage so it scales with zoom? Or portal?
+        // User appended to stage.
+
+        const size = this.random(2, 5);
+        p.style.width = `${size}px`;
+        p.style.height = `${size}px`;
+
+        // Position relative to window center (since stage is centered)
+        // User code: startX based on window width.
+        // My stage is centered. The particle logic assumes absolute positioning on screen?
+        // garganta.html had #stage relative, but spawnParticle calculated 'left' based on window.innerWidth
+        // Since my #garganta-stage is centered flex, absolute children are relative to it?
+        // No, #garganta-stage is flex, so direct children are flex items unless absolute.
+        // .particle is absolute.
+        // I need to adjust coordinates to be relative to the stage center if I append to stage.
+        // Or append to body/portal and manage coords.
+        // Let's stick to user logic but adjust for container.
+
+        // In user code: stage is 100vw/100vh relative.
+        // Particle left = window.innerWidth/2 + offset.
+        // If I append to stage (width 100vw), left/top work same way.
+
+        const startX = (window.innerWidth/2) + this.random(-this.state.currentWidth/2.2, this.state.currentWidth/2.2);
+        const startY = window.innerHeight/2; // Center Y
+
+        p.style.left = `${startX}px`;
+        p.style.top = `${startY}px`;
+
+        const destinationX = startX + this.random(-100, 100);
+        const destinationY = startY + this.random(-100, 100);
+
+        const duration = this.random(500, 1000);
+
+        p.animate([
+            { transform: 'translate(0,0) scale(1)', opacity: 1, backgroundColor: '#fff' },
+            { transform: `translate(${destinationX - startX}px, ${destinationY - startY}px) scale(0)`, opacity: 0, backgroundColor: '#00ffff' }
+        ], {
+            duration: duration,
+            easing: 'ease-out'
+        }).onfinish = () => p.remove();
+    }
+
+    animateFrame() {
+        if (!this.isActive) return;
+
+        // 1. Opening Logic
+        if (this.state.opening) {
+            this.state.progress += (1 - this.state.progress) * this.state.openingSpeed;
+            this.state.currentWidth = this.state.maxWidth * this.state.progress;
+            this.state.currentHeight = this.state.maxHeight * Math.pow(this.state.progress, 2);
+
+            if (this.state.progress > 0.99) {
+                this.state.opening = false;
+                this.state.progress = 1;
+            }
+        }
+
+        // 2. Dimensions
+        const displayWidth = Math.max(10, this.state.currentWidth);
+        const displayHeight = Math.max(4, this.state.currentHeight);
+
+        this.voidElement.style.width = `${displayWidth}px`;
+        this.voidElement.style.height = `${displayHeight}px`;
+
+        // 3. Clip Path (Frame-by-frame generation)
+        const currentNoise = this.state.noiseIntensity * (0.5 + this.state.progress / 2);
+        this.voidElement.style.clipPath = this.generateJaggedPolygon(displayWidth, displayHeight, currentNoise);
+
+        // 4. Shake
+        const shakeX = this.random(-2, 2) * this.state.progress;
+        const shakeY = this.random(-1, 1) * this.state.progress;
+
+        // Combine shake with existing transform if needed, but we used style.transform for shake in user code
+        // NOTE: In enterGate, I modify stage transform. Here I modify voidElement transform.
+        // This is fine.
+        this.voidElement.style.transform = `translate(${shakeX}px, ${shakeY}px)`;
+
+        // 5. Particles
+        if (this.state.progress > 0.1 && Math.random() > 0.8) {
+            this.spawnParticle();
+        }
+
+        this.animationId = requestAnimationFrame(this.animateFrame);
     }
 }

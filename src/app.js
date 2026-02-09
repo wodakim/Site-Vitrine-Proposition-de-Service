@@ -127,7 +127,7 @@ class App {
     toggleRetroMode() {
         const direction = this.isRetroMode ? 'toStandard' : 'toRetro';
         // Trigger Garganta
-        this.transitionManager.start(direction);
+        this.transitionManager.startTransition(() => this.completeTransition(direction));
     }
 
     completeTransition(direction) {
