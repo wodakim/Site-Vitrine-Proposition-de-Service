@@ -1,6 +1,10 @@
 
 export default class Cursor {
     constructor() {
+        // Bind methods
+        this.render = this.render.bind(this);
+        this.update = this.update.bind(this);
+
         this.canvas = document.createElement('canvas');
         this.ctx = this.canvas.getContext('2d');
         this.width = window.innerWidth;
@@ -23,10 +27,6 @@ export default class Cursor {
         }
 
         this.init();
-
-        // Bind methods
-        this.render = this.render.bind(this);
-        this.update = this.update.bind(this);
     }
 
     init() {

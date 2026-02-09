@@ -8,7 +8,7 @@
     "agency": {
         "title": "Nous Définissons les Marques.",
         "manifesto": "Nous ne créons pas simplement des sites web. Nous tissons des héritages numériques. Notre approche fusionne précision stratégique et vision artistique pour créer des expériences qui résonnent profondément.",
-        "media": "src/assets/placeholder.svg"
+        "media": "assets/placeholder.svg"
     },
     "services": [
         { "id": "01", "title": "Web Design", "list": ["UX/UI Design", "Prototypage", "Design Systems"] },
@@ -17,10 +17,10 @@
         { "id": "04", "title": "SEO & Perf", "list": ["SEO Technique", "Core Web Vitals", "Optimisation"] }
     ],
     "projects": [
-        { "id": "p1", "title": "Aether Spirits", "client": "Aether Inc.", "services": "WebGL / E-Commerce", "year": "2024", "image": "src/assets/placeholder.svg" },
-        { "id": "p2", "title": "Chronos Watch", "client": "Horlogerie Suisse", "services": "Showcase 3D", "year": "2023", "image": "src/assets/placeholder.svg" },
-        { "id": "p3", "title": "Velvet Mode", "client": "Maison Velvet", "services": "Portfolio / Minimal", "year": "2023", "image": "src/assets/placeholder.svg" },
-        { "id": "p4", "title": "Apex Arch", "client": "Apex Studio", "services": "Corporate", "year": "2022", "image": "src/assets/placeholder.svg" }
+        { "id": "p1", "title": "Aether Spirits", "client": "Aether Inc.", "services": "WebGL / E-Commerce", "year": "2024", "image": "assets/nebula.jpg" },
+        { "id": "p2", "title": "Chronos Watch", "client": "Horlogerie Suisse", "services": "Showcase 3D", "year": "2023", "image": "assets/silence.jpg" },
+        { "id": "p3", "title": "Velvet Mode", "client": "Maison Velvet", "services": "Portfolio / Minimal", "year": "2023", "image": "assets/urban.jpg" },
+        { "id": "p4", "title": "Apex Arch", "client": "Apex Studio", "services": "Corporate", "year": "2022", "image": "assets/placeholder.svg" }
     ],
     "footer": {
         "title": "Créons\nEnsemble.",
