@@ -1,6 +1,99 @@
 
 // src/components/renderer.js
 
+// --- HELPER: PAGE HEADER ---
+export function renderPageHeader(title, subtitle, container) {
+    const section = document.createElement('section');
+    section.className = 'page-header-section';
+    section.style.padding = 'var(--pad)';
+    section.style.paddingTop = '150px'; // Space for fixed nav
+    section.style.paddingBottom = '50px';
+    section.style.minHeight = '40vh';
+    section.style.display = 'flex';
+    section.style.flexDirection = 'column';
+    section.style.justifyContent = 'flex-end';
+
+    // Kinetic Typography for Title
+    const kineticText = title.split(' ').map((word, i) => {
+        const delay = i * 0.1;
+        return `<span class="reveal-line-wrapper"><span class="kinetic-line reveal-line" data-skew="0.1" style="transition-delay: ${delay}s; font-size: clamp(3rem, 8vw, 6rem); line-height: 0.9;">${word}</span></span>`;
+    }).join(' ');
+
+    let subHtml = '';
+    if (subtitle) {
+        subHtml = `<p class="reveal-hidden" style="transition-delay: 0.3s; margin-top: 20px; max-width: 600px; font-size: 1.2rem; opacity: 0.7;">${subtitle}</p>`;
+    }
+
+    section.innerHTML = `
+        <h1 class="page-title">${kineticText}</h1>
+        ${subHtml}
+    `;
+    container.appendChild(section);
+}
+
+
+// --- PAGE RENDERERS ---
+
+// 1. AGENCY PAGE
+export function renderAgencyPage(data, container) {
+    if (!data) return;
+    renderPageHeader("L'AGENCE", "Nous tissons des héritages numériques.", container);
+    renderAgency(data, container); // Reuse the agency section content
+
+    // Additional "Team" or "History" filler for the page feel
+    const extra = document.createElement('div');
+    extra.className = 'grid-container';
+    extra.innerHTML = `
+        <div style="grid-column: 1/-1; padding-top: 40px; opacity: 0.8; font-family: var(--font-serif); font-size: 1.5rem;">
+            <p>Fondée en 2020, LogoLoom repousse les limites de l'expérience web. Notre équipe de designers et développeurs passionnés travaille à la croisée de l'art et de la technique.</p>
+        </div>
+    `;
+    container.appendChild(extra);
+}
+
+// 2. SERVICES PAGE
+export function renderServicesPage(data, container) {
+    if (!data) return;
+    renderPageHeader("NOS EXPERTISES", "Des solutions sur mesure pour des marques visionnaires.", container);
+
+    // Re-use the existing service grid but maybe expanded?
+    // For now, reuse renderServices logic but customize class if needed
+    renderServices(data, container);
+
+    // Maybe add a call to action at the bottom of the page?
+    const cta = document.createElement('div');
+    cta.className = 'grid-container';
+    cta.style.paddingTop = '0';
+    cta.innerHTML = `
+        <div style="grid-column: 1/-1; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 40px;">
+            <p style="font-size: 2rem; margin-bottom: 20px;">Un projet en tête ?</p>
+            <a href="#contact" class="btn-cta">Démarrer une discussion</a>
+        </div>
+    `;
+    container.appendChild(cta);
+}
+
+// 2. WORK PAGE
+export function renderWorkPage(data, container) {
+    if (!data) return;
+    renderPageHeader("SELECTION PROJETS", "Une exploration de l'intersection entre design et technologie.", container);
+
+    // Reuse renderProjects
+    renderProjects(data, container);
+}
+
+// 3. CONTACT PAGE
+export function renderContactPage(data, container) {
+    if (!data) return;
+    // Footer essentially acts as contact page in this design, so we can just use renderFooter but maybe prepended with a header?
+    renderPageHeader("CONTACT", "Prêt à tisser votre future identité numérique ?", container);
+
+    renderFooter(data, container);
+}
+
+
+// --- EXISTING SECTION RENDERERS (Unchanged logic mostly) ---
+
 export function renderHero(data, container) {
     if (!data) return;
     const section = document.createElement('section');
@@ -35,7 +128,7 @@ export function renderAgency(data, container) {
     const words = data.manifesto.split(' ').map((word, i) => {
         const delay = i * 0.03; // Fast stagger
         return `<span class="word-wrapper"><span class="word-reveal" style="transition-delay: ${delay}s">${word}</span></span>`;
-    }).join(''); // Space margin handled by CSS margin-right
+    }).join(' '); // Space margin handled by CSS margin-right
 
     section.innerHTML = `
         <div class="agency-text">

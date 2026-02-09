@@ -1,5 +1,5 @@
 
-import { renderHero, renderAgency, renderServices, renderProjects, renderFooter, renderProjectDetail } from './components/renderer.js';
+import { renderHero, renderAgency, renderServices, renderProjects, renderFooter, renderProjectDetail, renderServicesPage, renderWorkPage, renderContactPage, renderAgencyPage } from './components/renderer.js';
 import SmoothScroll from './components/scroll.js';
 import Router from './components/router.js';
 import Cursor from './components/cursor.js';
@@ -39,6 +39,7 @@ class App {
         nav.innerHTML = `
             <a href="#" class="nav-logo">LOGOLOOM</a>
             <div class="nav-links">
+                <a href="#agency" data-hover="magnetic">Agency</a>
                 <a href="#work" data-hover="magnetic">Work</a>
                 <a href="#services" data-hover="magnetic">Services</a>
                 <a href="#contact" data-hover="magnetic">Contact</a>
@@ -94,8 +95,10 @@ class App {
         const routes = {
             'home': () => this.handleRoute('home'),
             'project': (id) => this.handleRoute('project', id),
-            'services': () => this.handleRoute('home'), // Fallback for now
-            'contact': () => this.handleRoute('home')   // Fallback
+            'agency': () => this.handleRoute('agency'),
+            'services': () => this.handleRoute('services'),
+            'work': () => this.handleRoute('work'),
+            'contact': () => this.handleRoute('contact')
         };
 
         this.router = new Router(routes);
@@ -121,6 +124,14 @@ class App {
             this.renderHome();
         } else if (view === 'project') {
             this.renderProject(param);
+        } else if (view === 'agency') {
+            this.renderAgencyPage();
+        } else if (view === 'services') {
+            this.renderServicesPage();
+        } else if (view === 'work') {
+            this.renderWorkPage();
+        } else if (view === 'contact') {
+            this.renderContactPage();
         }
 
         // Re-init Scroll Height & Cache
@@ -147,6 +158,29 @@ class App {
         renderServices(this.data.services, this.container);
         renderProjects(this.data.projects, this.container);
         renderFooter(this.data.footer, this.container);
+    }
+
+    renderAgencyPage() {
+        if (!this.data) return;
+        renderAgencyPage(this.data.agency, this.container);
+        renderFooter(this.data.footer, this.container);
+    }
+
+    renderServicesPage() {
+        if (!this.data) return;
+        renderServicesPage(this.data.services, this.container);
+        renderFooter(this.data.footer, this.container);
+    }
+
+    renderWorkPage() {
+        if (!this.data) return;
+        renderWorkPage(this.data.projects, this.container);
+        renderFooter(this.data.footer, this.container);
+    }
+
+    renderContactPage() {
+        if (!this.data) return;
+        renderContactPage(this.data.footer, this.container);
     }
 
     renderProject(id) {
@@ -190,7 +224,8 @@ class App {
         }, options);
 
         // Target elements
-        const targets = document.querySelectorAll('.hero-title, .agency-manifesto, .service-card, .project-row, .footer-title, .detail-title, .detail-desc');
+        // Added .page-title for new pages
+        const targets = document.querySelectorAll('.hero-title, .agency-manifesto, .service-card, .project-row, .footer-title, .detail-title, .detail-desc, .page-title');
         targets.forEach(el => {
             el.classList.add('reveal-hidden');
             this.observer.observe(el);
