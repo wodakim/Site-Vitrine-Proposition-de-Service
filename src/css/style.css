@@ -778,106 +778,7 @@ body.custom-cursor-active * {
 }
 
 
-/* GARGANTA PORTAL STYLES */
-#garganta-portal {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    display: none;
-    overflow: hidden;
-}
-
-/* The Void (Background) */
-.g-void {
-    position: absolute;
-    inset: 0;
-    background: #000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10000;
-    transform: scale(0);
-    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-#garganta-portal.active .g-void {
-    transform: scale(1);
-    /* Tear Effect: A thin line opening vertically */
-    clip-path: polygon(0 49%, 100% 49%, 100% 51%, 0 51%);
-    animation: tear-open 1s forwards cubic-bezier(0.2, 0, 0, 1);
-}
-
-@keyframes tear-open {
-    0% { clip-path: polygon(0 50%, 100% 50%, 100% 50%, 0 50%); }
-    20% { clip-path: polygon(0 48%, 100% 45%, 100% 55%, 0 52%); }
-    100% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
-}
-
-/* The Gate (Center Object) */
-.g-gate-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    cursor: pointer;
-    opacity: 0;
-    transform: scale(0.5);
-    transition: all 0.5s ease 0.5s; /* Delay appearance */
-}
-
-#garganta-portal.active .g-gate-container {
-    opacity: 1;
-    transform: scale(1);
-}
-
-.g-gate {
-    width: 20px;
-    height: 100px;
-    background: white;
-    box-shadow: 0 0 20px white;
-    border-radius: 50%;
-    animation: gate-pulse 1.5s infinite;
-}
-
-@keyframes gate-pulse {
-    0%, 100% { transform: scaleY(1); opacity: 0.8; }
-    50% { transform: scaleY(1.2); opacity: 1; box-shadow: 0 0 60px white; }
-}
-
-.g-label {
-    margin-top: 20px;
-    font-family: var(--font-sans);
-    letter-spacing: 0.2em;
-    font-size: 0.8rem;
-    color: white;
-    text-shadow: 0 0 10px rgba(255,255,255,0.5);
-}
-
-/* Zoom Interaction */
-.g-gate-container.zooming {
-    transition: transform 0.8s cubic-bezier(0.5, 0, 0, 1), opacity 0.5s ease;
-    transform: scale(50); /* Massive Zoom */
-    opacity: 0; /* Fade out as it engulfs screen */
-    pointer-events: none;
-}
-
-/* Blur Effect on Content */
-#app.blur-transition {
-    filter: blur(20px);
-    transition: filter 0.5s ease;
-}
-
-/* Fading Out the Portal */
-#garganta-portal.fading {
-    opacity: 0;
-    transition: opacity 1s ease;
-    pointer-events: none;
-}
-
-/* Modify existing Overlay to be removed if present */
-#transition-overlay { display: none !important; }
-
-
-/* GARGANTA PORTAL (BLEACH STYLE) */
+/* GARGANTA PORTAL (INTERDIMENSIONAL TEAR) */
 #garganta-portal {
     position: fixed;
     inset: 0;
@@ -885,8 +786,8 @@ body.custom-cursor-active * {
     display: none; /* Controlled by JS */
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.4); /* Slight dim */
-    backdrop-filter: blur(5px);
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
     pointer-events: none;
 }
 
@@ -895,7 +796,6 @@ body.custom-cursor-active * {
     pointer-events: auto;
 }
 
-/* The Void Container */
 .g-void-container {
     position: relative;
     width: 100%;
@@ -904,91 +804,88 @@ body.custom-cursor-active * {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    perspective: 1000px;
 }
 
-/* The Void Itself (Black Tear) */
+.g-void-wrapper {
+    position: relative;
+    z-index: 10002;
+    /* Glow follows the clip-path of the child */
+    filter: drop-shadow(0 0 10px var(--portal-glow, #00eaff))
+            drop-shadow(0 0 30px var(--portal-glow-secondary, #2c2cff));
+    animation: glow-pulse 2s infinite alternate;
+}
+
+@keyframes glow-pulse {
+    from { filter: drop-shadow(0 0 10px var(--portal-glow)) drop-shadow(0 0 30px var(--portal-glow-secondary)); }
+    to { filter: drop-shadow(0 0 20px var(--portal-glow)) drop-shadow(0 0 50px var(--portal-glow-secondary)); }
+}
+
 .g-void {
     width: min(80vw, 600px);
-    height: min(50vh, 400px);
+    height: min(60vh, 500px);
     background: #000;
-    border-radius: 50%;
-    /* Start as a thin line */
-    transform: scaleY(0.02) scaleX(0.8);
+    /* clip-path set by JS */
+
+    /* Initial closed state */
+    transform: scaleX(0.005) scaleY(0.8); /* Thin vertical line */
     opacity: 0;
-
-    /* Glow/Smoke Effect - Blue/Cyan for Standard->Retro, Red/Orange for Retro->Standard? handled via CSS var */
-    box-shadow:
-        0 0 20px var(--portal-glow, #2C2CFF),
-        0 0 60px var(--portal-glow, #2C2CFF),
-        inset 0 0 100px #000;
-
-    transition:
-        transform 1s cubic-bezier(0.2, 0.8, 0.2, 1),
-        opacity 0.5s ease;
-
     cursor: pointer;
-    position: relative;
-    z-index: 10001;
-    overflow: hidden;
+    transition: transform 0.1s; /* Reset */
 }
 
-/* Jagged Edge Simulation (Pseudo-element) */
-.g-void::before {
-    content: '';
-    position: absolute;
-    inset: -10px;
-    border-radius: 50%;
-    background: transparent;
-    box-shadow: 0 0 30px var(--portal-glow, #2C2CFF);
-    z-index: -1;
-    filter: blur(10px);
-    opacity: 0.8;
-    animation: portal-pulse 2s infinite ease-in-out;
+#garganta-portal.active .g-void {
+    opacity: 1;
+    /* Violent Tear Animation */
+    animation: tear-open 0.6s cubic-bezier(0.2, 1.2, 0.2, 1) forwards;
 }
 
-/* Inner Turbulence (Optional) */
-.g-void::after {
-    content: '';
+@keyframes tear-open {
+    0% { transform: scaleX(0.005) scaleY(0.8) skewX(0deg); }
+    20% { transform: scaleX(0.3) scaleY(0.85) skewX(-5deg); }
+    40% { transform: scaleX(0.6) scaleY(0.9) skewX(5deg); }
+    60% { transform: scaleX(0.9) scaleY(0.95) skewX(-2deg); }
+    80% { transform: scaleX(1.05) scaleY(1.02) skewX(1deg); } /* Overshoot */
+    100% { transform: scaleX(1) scaleY(1) skewX(0deg); }
+}
+
+.g-void:hover {
+    transform: scale(1.05); /* Gentle hover zoom */
+}
+
+/* Entering Animation (Zoom into void) */
+.g-void.entering {
+    animation: enter-void 1s cubic-bezier(0.7, 0, 0.2, 1) forwards !important;
+    pointer-events: none;
+}
+
+@keyframes enter-void {
+    0% { transform: scale(1); }
+    100% { transform: scale(30); opacity: 0; }
+}
+
+/* Canvas for Particles */
+#reiatsu-canvas {
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at center, rgba(44, 44, 255, 0.1), transparent 70%);
-    opacity: 0.5;
+    pointer-events: none;
+    z-index: 10001; /* Behind wrapper? Or in front? Particles should emerge from it. */
+    /* If wrapper has drop-shadow, it might be on top. Let's put canvas on top but blend it? */
     mix-blend-mode: screen;
 }
 
-@keyframes portal-pulse {
-    0%, 100% { transform: scale(1); opacity: 0.8; }
-    50% { transform: scale(1.02); opacity: 1; }
-}
-
-/* Active State (Open) */
-#garganta-portal.active .g-void {
-    transform: scaleY(1) scaleX(1); /* Full Oval */
-    opacity: 1;
-}
-
-/* Hover Effect */
-.g-void:hover {
-    box-shadow:
-        0 0 40px var(--portal-glow, #2C2CFF),
-        0 0 100px var(--portal-glow, #2C2CFF),
-        inset 0 0 50px #000;
-}
-
-/* Label */
 .g-label {
-    margin-top: 40px;
+    margin-top: 50px;
     font-family: 'Space Mono', monospace;
-    font-size: 1rem;
-    letter-spacing: 0.3em;
+    font-size: 1.2rem;
+    letter-spacing: 0.5em;
     text-transform: uppercase;
-    color: white;
-    text-shadow: 0 0 10px white;
+    color: var(--text-color);
+    text-shadow: 0 0 10px currentColor;
     opacity: 0;
     transform: translateY(20px);
-    transition: all 0.5s ease 0.5s; /* Delay */
-    pointer-events: none;
+    transition: all 0.5s ease 0.4s;
+    position: relative;
+    z-index: 10003;
 }
 
 #garganta-portal.active .g-label {
@@ -996,25 +893,16 @@ body.custom-cursor-active * {
     transform: translateY(0);
 }
 
-/* ZOOM ENTRY EFFECT */
-.g-void.entering {
-    transform: scale(50) !important; /* Engulf screen */
-    transition: transform 1.5s cubic-bezier(0.7, 0, 0.2, 1);
-    pointer-events: none;
+/* Blur Background */
+.blur-transition #app {
+    filter: blur(10px) brightness(0.5);
+    transform: scale(0.98);
+    transition: all 0.5s ease;
 }
 
-/* FADE OUT */
 #garganta-portal.fading {
     opacity: 0;
-    transition: opacity 1s ease;
-    pointer-events: none;
-}
-
-/* BLUR CONTENT */
-.blur-transition #app,
-.blur-transition canvas {
-    filter: blur(10px);
-    transition: filter 0.5s ease;
+    transition: opacity 0.8s ease;
 }
 
 
