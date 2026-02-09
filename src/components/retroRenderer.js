@@ -75,24 +75,150 @@ export default class RetroRenderer {
             </div>
         `;
 
-        // Add Event Listeners for Icons
+        // Add Event Listeners for Icons (Touch/Click)
         const icons = this.container.querySelectorAll('.retro-icon');
         icons.forEach(icon => {
-            icon.addEventListener('dblclick', () => {
-                if (icon.id === 'retro-contact-icon') {
-                    this.renderContact();
-                } else {
-                    const id = icon.dataset.id;
-                    const project = this.data.projects.find(p => p.id === id);
-                    this.openWindow(project.title, `
-                        <img src="${project.image}" style="width:100%; image-rendering: pixelated; margin-bottom: 10px;">
-                        <p>${project.description || 'No description available.'}</p>
-                        <p><strong>Client:</strong> ${project.client}</p>
-                        <p><strong>Year:</strong> ${project.year}</p>
-                    `);
-                }
+            // Use 'click' for better mobile support instead of dblclick
+            icon.addEventListener('click', (e) => {
+                this.handleIconClick(icon);
             });
         });
+
+        // Add Mobile Konami Button
+        this.addMobileKonamiBtn();
+    }
+
+    // Fix undefined reference in previous edit
+    handleIconClick(icon) {
+        if (icon.id === 'retro-contact-icon') {
+            this.renderContact();
+        } else {
+            const id = icon.dataset.id;
+            const project = this.data.projects.find(p => p.id === id);
+            this.openWindow(project.title, `
+                <img src="${project.image}" style="width:100%; image-rendering: pixelated; margin-bottom: 10px;">
+                <p>${project.description || 'No description available.'}</p>
+                <p><strong>Client:</strong> ${project.client}</p>
+                <p><strong>Year:</strong> ${project.year}</p>
+            `);
+        }
+    }
+
+    addMobileKonamiBtn() {
+        if (window.innerWidth > 768) return; // Only mobile
+
+        const btn = document.createElement('button');
+        btn.id = 'mobile-konami-btn';
+        btn.className = 'mobile-konami-btn';
+        btn.innerHTML = '🎮';
+        btn.onclick = () => this.openKonamiPad();
+        document.body.appendChild(btn);
+    }
+
+    openKonamiPad() {
+        // Prevent dupes
+        if (document.querySelector('.konami-overlay')) return;
+
+        const overlay = document.createElement('div');
+        overlay.className = 'konami-overlay';
+        overlay.innerHTML = `
+            <button class="close-pad">X</button>
+            <div class="d-pad">
+                <div></div><button class="d-btn" data-key="ArrowUp">⬆</button><div></div>
+                <button class="d-btn" data-key="ArrowLeft">⬅</button><div></div><button class="d-btn" data-key="ArrowRight">➡</button>
+                <div></div><button class="d-btn" data-key="ArrowDown">⬇</button><div></div>
+            </div>
+            <div class="ab-btns">
+                <button class="ab-btn" data-key="b">B</button>
+                <button class="ab-btn" data-key="a">A</button>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+
+        // Close
+        overlay.querySelector('.close-pad').onclick = () => overlay.remove();
+
+        // Wire up buttons to simulate key press
+        const buttons = overlay.querySelectorAll('button[data-key]');
+        buttons.forEach(b => {
+            b.onclick = () => {
+                const key = b.dataset.key;
+                this.handleKonamiInput(key);
+
+                // Visual feedback
+                b.style.transform = "scale(0.9)";
+                setTimeout(() => b.style.transform = "scale(1)", 100);
+            };
+        });
+    }
+
+    handleKonamiInput(key) {
+        const event = new KeyboardEvent('keydown', { key: key });
+        window.dispatchEvent(event);
+    }
+
+    handleIconClick(icon) {
+        if (icon.id === 'retro-contact-icon') {
+            this.renderContact();
+        } else {
+            const id = icon.dataset.id;
+            const project = this.data.projects.find(p => p.id === id);
+            this.openWindow(project.title, `
+                <img src="${project.image}" style="width:100%; image-rendering: pixelated; margin-bottom: 10px;">
+                <p>${project.description || 'No description available.'}</p>
+                <p><strong>Client:</strong> ${project.client}</p>
+                <p><strong>Year:</strong> ${project.year}</p>
+            `);
+        }
+    }
+
+    addMobileKonamiBtn() {
+        if (window.innerWidth > 768) return; // Only mobile
+
+        const btn = document.createElement('button');
+        btn.id = 'mobile-konami-btn';
+        btn.innerHTML = '🎮';
+        btn.onclick = () => this.openKonamiPad();
+        document.body.appendChild(btn);
+    }
+
+    openKonamiPad() {
+        const overlay = document.createElement('div');
+        overlay.className = 'konami-overlay';
+        overlay.innerHTML = `
+            <button class="close-pad" onclick="this.parentElement.remove()">X</button>
+            <div class="d-pad">
+                <div></div><button class="d-btn" data-key="ArrowUp">⬆</button><div></div>
+                <button class="d-btn" data-key="ArrowLeft">⬅</button><div></div><button class="d-btn" data-key="ArrowRight">➡</button>
+                <div></div><button class="d-btn" data-key="ArrowDown">⬇</button><div></div>
+            </div>
+            <div class="ab-btns">
+                <button class="ab-btn" data-key="b">B</button>
+                <button class="ab-btn" data-key="a">A</button>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+
+        // Wire up buttons to simulate key press
+        const buttons = overlay.querySelectorAll('button[data-key]');
+        buttons.forEach(b => {
+            b.onclick = () => {
+                const key = b.dataset.key;
+                // Trigger the logic directly or simulate event
+                this.handleKonamiInput(key);
+
+                // Visual feedback
+                b.style.transform = "scale(0.9)";
+                setTimeout(() => b.style.transform = "scale(1)", 100);
+            };
+        });
+    }
+
+    handleKonamiInput(key) {
+        // Reuse logic from key handler but exposed
+        // Or dispatch event
+        const event = new KeyboardEvent('keydown', { key: key });
+        window.dispatchEvent(event);
     }
 
     openWindow(title, content) {

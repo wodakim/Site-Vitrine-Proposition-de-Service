@@ -5,6 +5,7 @@ import Router from './components/router.js';
 import Cursor from './components/cursor.js';
 import LiquidEffect from './components/liquid.js';
 import RetroRenderer from './components/retroRenderer.js';
+import TransitionManager from './components/transition.js';
 
 class App {
     constructor() {
@@ -13,6 +14,7 @@ class App {
         this.router = null;
         this.liquid = null;
         this.retroRenderer = null;
+        this.transitionManager = null;
 
         this.data = null;
         this.container = null;
@@ -39,10 +41,8 @@ class App {
         noise.className = 'noise-overlay';
         document.body.appendChild(noise);
 
-        // Add Transition Overlay
-        const transitionOverlay = document.createElement('div');
-        transitionOverlay.id = 'transition-overlay';
-        document.body.appendChild(transitionOverlay);
+        // Init Transition Manager
+        this.transitionManager = new TransitionManager(this.completeTransition);
 
         // Add Navigation Header (Menu Weaving Target)
         this.createNav();
@@ -124,51 +124,42 @@ class App {
     }
 
     toggleRetroMode() {
-        const overlay = document.getElementById('transition-overlay');
+        const direction = this.isRetroMode ? 'toStandard' : 'toRetro';
+        // Trigger Garganta
+        this.transitionManager.start(direction);
+    }
 
-        // 1. Trigger Glitch Animation
-        overlay.classList.add('active');
+    completeTransition(direction) {
+        this.isRetroMode = !this.isRetroMode;
 
-        // 2. Wait mid-animation to switch state
-        setTimeout(() => {
-            this.isRetroMode = !this.isRetroMode;
+        if (this.isRetroMode) {
+            // Destroy Standard
+            if (this.scroll) this.scroll.destroy();
+            document.body.style.height = '100vh';
+            document.body.style.overflow = 'hidden';
+            document.getElementById('main-nav').style.display = 'none';
+            document.getElementById('mode-toggle').classList.add('retro');
 
-            // Toggle Logic
-            if (this.isRetroMode) {
-                // Destroy Standard
-                if (this.scroll) this.scroll.destroy(); // Disable smooth scroll
-                document.body.style.height = '100vh'; // Reset height
-                document.body.style.overflow = 'hidden';
-                document.getElementById('main-nav').style.display = 'none'; // Hide standard nav
-                document.getElementById('mode-toggle').classList.add('retro');
+            // Render Retro
+            this.container.innerHTML = '';
+            this.retroRenderer.init();
 
-                // Render Retro
-                this.container.innerHTML = ''; // Clear
-                this.retroRenderer.init();
+        } else {
+            // Destroy Retro
+            this.retroRenderer.destroy();
+            document.getElementById('main-nav').style.display = 'flex';
+            document.getElementById('mode-toggle').classList.remove('retro');
+            document.body.style.overflow = '';
 
-            } else {
-                // Destroy Retro
-                this.retroRenderer.destroy();
-                document.getElementById('main-nav').style.display = 'flex';
-                document.getElementById('mode-toggle').classList.remove('retro');
-                document.body.style.overflow = '';
+            // Restore Standard
+            this.handleRoute(this.router.currentHash || 'home');
 
-                // Restore Standard
-                this.handleRoute(this.router.currentHash || 'home'); // Re-render current route
-
-                // Re-enable Scroll
-                 if (this.scroll) {
-                    this.scroll = new SmoothScroll();
-                    setTimeout(() => this.scroll.resize(), 100);
-                }
+            // Re-enable Scroll
+             if (this.scroll) {
+                this.scroll = new SmoothScroll();
+                setTimeout(() => this.scroll.resize(), 100);
             }
-
-        }, 800); // Half of animation duration
-
-        // 3. Remove Overlay
-        setTimeout(() => {
-            overlay.classList.remove('active');
-        }, 1600);
+        }
     }
 
     initRouter() {
