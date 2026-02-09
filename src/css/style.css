@@ -12,7 +12,8 @@
 *, *::before, *::after { box-sizing: border-box; }
 
 html {
-    scroll-behavior: smooth; /* Native smooth scroll */
+    /* Removed scroll-behavior: smooth to avoid conflict with virtual scroll */
+    overscroll-behavior: none;
 }
 
 body {
@@ -20,7 +21,7 @@ body {
     color: var(--text-color);
     font-family: var(--font-sans);
     margin: 0;
-    overflow-x: hidden;
+    /* overflow-y is managed by JS for virtual scroll */
     cursor: auto;
 }
 
@@ -59,6 +60,13 @@ a { color: inherit; text-decoration: none; }
     transform: translateY(0);
 }
 
+/* Performance Optimizations for Motion */
+[data-skew], [data-speed] {
+    will-change: transform;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+}
+
 /* Structure */
 .grid-container {
     padding: var(--pad);
@@ -77,7 +85,7 @@ a { color: inherit; text-decoration: none; }
 }
 .hero-bg {
     position: absolute; inset: 0; z-index: -1;
-    transition: transform 0.2s ease-out; /* Subtle parallax if added via JS */
+    /* Managed by JS for parallax */
 }
 .hero-title {
     font-size: clamp(3rem, 12vw, 12rem);
@@ -85,7 +93,6 @@ a { color: inherit; text-decoration: none; }
     text-transform: uppercase;
     mix-blend-mode: exclusion;
     white-space: nowrap;
-    will-change: transform; /* Optimize for skew */
     transform-origin: center center;
 }
 .kinetic-line { display: block; }
@@ -102,7 +109,7 @@ a { color: inherit; text-decoration: none; }
     align-items: center;
 }
 .agency-text { grid-column: 1 / 7; }
-.agency-media { grid-column: 8 / -1; }
+.agency-media { grid-column: 8 / -1; position: relative; overflow: hidden; }
 .agency-manifesto {
     font-size: clamp(2rem, 4vw, 4rem);
     line-height: 1.1;
@@ -163,22 +170,20 @@ a { color: inherit; text-decoration: none; }
 .p-service { font-family: var(--font-sans); opacity: 0.6; font-size: 0.8em; text-align: right; }
 .p-year { font-family: var(--font-sans); opacity: 0.6; font-size: 0.8em; text-align: right; }
 
-/* Project Thumb Reveal (CSS Only) */
+/* Project Thumb Reveal */
 #project-thumb-container {
     position: fixed;
     top: 0; left: 0;
-    width: 300px; height: 400px; /* Fixed size thumb */
+    width: 300px; height: 400px;
     pointer-events: none;
     z-index: 10;
     opacity: 0;
-    transition: opacity 0.3s ease, transform 0.1s linear; /* Smooth fade, fast follow */
-    mix-blend-mode: normal; /* Normal image */
+    transition: opacity 0.3s ease, transform 0.1s linear;
+    mix-blend-mode: normal;
     overflow: hidden;
 }
 #project-thumb-container img {
     width: 100%; height: 100%; object-fit: cover;
-    /* Simulate liquid distortion with SVG filter if supported, else just image */
-    /* filter: url('#liquid');  Chrome might lag with this on moving element */
 }
 
 /* Footer */
@@ -227,5 +232,182 @@ a { color: inherit; text-decoration: none; }
     .project-row { grid-template-columns: 1fr; gap: 10px; }
     .p-client, .p-service, .p-year { display: none; }
     .p-title { font-size: 1.5rem; }
-    #project-thumb-container { display: none; } /* Hide hover effect on touch */
+    #project-thumb-container { display: none; }
+}
+
+/* SPA / Project Detail View (New) */
+.project-detail-section {
+    padding: var(--pad);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding-top: 100px; /* Space for fixed header/back button */
+}
+
+.back-btn {
+    position: fixed;
+    top: 40px; left: var(--pad);
+    z-index: 50;
+    font-family: var(--font-sans);
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+    mix-blend-mode: difference;
+    color: white; /* Fallback */
+}
+.back-btn:hover { opacity: 1; text-decoration: underline; }
+
+.detail-title {
+    font-size: clamp(3rem, 10vw, 10rem);
+    line-height: 0.9;
+    margin-bottom: 40px;
+    text-transform: uppercase;
+    mix-blend-mode: difference;
+}
+
+.detail-meta {
+    display: flex;
+    gap: 40px;
+    font-family: var(--font-sans);
+    opacity: 0.6;
+    margin-bottom: 60px;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    border-top: 1px solid rgba(255,255,255,0.2);
+    padding-top: 20px;
+}
+
+.detail-img-wrapper {
+    width: 100%;
+    height: 70vh;
+    overflow: hidden;
+    margin-bottom: 60px;
+    position: relative;
+}
+
+.detail-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.1); /* Slight zoom for parallax */
+}
+
+.detail-desc {
+    max-width: 800px;
+    font-size: clamp(1.2rem, 2vw, 2rem);
+    line-height: 1.4;
+    margin-left: auto;
+    font-family: var(--font-serif);
+}
+
+/* Ensure Links inside projects work as blocks */
+a.project-row {
+    color: inherit;
+    text-decoration: none;
+    display: grid; /* Maintain grid layout */
+}
+
+/* NOISE OVERLAY */
+.noise-overlay {
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    pointer-events: none;
+    z-index: 9000;
+    opacity: 0.07;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    background-size: 200px 200px; /* Small tile size */
+    animation: noise-shift 0.2s infinite;
+}
+
+@keyframes noise-shift {
+    0% { transform: translate(0, 0); }
+    10% { transform: translate(-5%, -5%); }
+    20% { transform: translate(-10%, 5%); }
+    30% { transform: translate(5%, -10%); }
+    40% { transform: translate(-5%, 15%); }
+    50% { transform: translate(-10%, 5%); }
+    60% { transform: translate(15%, 0); }
+    70% { transform: translate(0, 10%); }
+    80% { transform: translate(-15%, 0); }
+    90% { transform: translate(10%, 5%); }
+    100% { transform: translate(5%, 0); }
+}
+
+/* ENHANCED TEXT REVEAL */
+.reveal-line-wrapper {
+    overflow: hidden; /* Mask the reveal */
+    display: inline-block; /* Or block depending on context */
+}
+
+.reveal-line {
+    display: inline-block;
+    transform: translateY(100%);
+    transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-active .reveal-line {
+    transform: translateY(0);
+}
+
+/* Stagger delays handled via JS or nth-child if static */
+/* Basic stagger for lists */
+.reveal-active.service-card { transition-delay: 0.1s; }
+.reveal-active .p-client { transition-delay: 0.1s; }
+.reveal-active .p-title { transition-delay: 0.2s; }
+
+/* Word Reveal */
+.word-wrapper {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
+    margin-right: 0.2em;
+}
+.word-reveal {
+    display: inline-block;
+    transform: translateY(110%);
+    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal-active .word-reveal {
+    transform: translateY(0);
+}
+
+/* Navigation Header */
+.main-nav {
+    position: fixed;
+    top: 0; left: 0; width: 100%;
+    padding: 30px var(--pad);
+    display: flex; justify-content: space-between; align-items: center;
+    z-index: 1000;
+    pointer-events: none; /* Let clicks pass through except on links */
+    mix-blend-mode: difference;
+}
+.main-nav a {
+    pointer-events: auto;
+    font-family: var(--font-sans);
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    color: white; /* Difference blend mode makes it invert */
+    margin-left: 30px;
+    position: relative;
+    letter-spacing: 0.1em;
+}
+.nav-logo {
+    font-weight: 700;
+    margin-left: 0 !important;
+}
+.nav-links a {
+    opacity: 0.7;
+    transition: opacity 0.3s;
+}
+.nav-links a:hover {
+    opacity: 1;
+}
+
+/* Hide default cursor */
+body, a {
+    cursor: none !important;
 }
