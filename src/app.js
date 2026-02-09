@@ -29,6 +29,7 @@ class App {
         this.handleProjectLeave = this.handleProjectLeave.bind(this);
         this.animateTransition = this.animateTransition.bind(this);
         this.toggleRetroMode = this.toggleRetroMode.bind(this);
+        this.completeTransition = this.completeTransition.bind(this);
     }
 
     async init() {

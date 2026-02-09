@@ -5,6 +5,10 @@ export default class TransitionManager {
         this.isAnimating = false;
         this.direction = null;
 
+        // Audio
+        this.audio = new Audio('src/assets/audio/bleach-garganta.mp3');
+        this.audio.volume = 0.5;
+
         // Bind
         this.start = this.start.bind(this);
         this.enterGate = this.enterGate.bind(this);
@@ -18,19 +22,21 @@ export default class TransitionManager {
         this.overlay.id = 'garganta-portal';
 
         this.overlay.innerHTML = `
-            <div class="g-void">
-                <div class="g-gate-container" style="display:flex; flex-direction:column; align-items:center; cursor:pointer;">
-                    <div class="g-gate" style="width:2px; height:60vh; background:white; box-shadow:0 0 20px white; border-radius:50%; margin-bottom:20px;"></div>
-                    <div class="g-label" style="font-family:inherit; letter-spacing:0.2em; font-size:0.8rem; color:white; text-transform:uppercase;">OUVRIR LA BRECHE</div>
-                </div>
+            <div class="g-void-container">
+                <div class="g-void"></div>
+                <div class="g-label">OUVRIR LA BRECHE</div>
             </div>
         `;
 
         document.body.appendChild(this.overlay);
 
-        // Click Listener for the Gate (Using container for easier hit area)
-        const gate = this.overlay.querySelector('.g-gate-container');
-        gate.addEventListener('click', this.enterGate);
+        // Click Listener on the VOID (the tear itself)
+        const voidEl = this.overlay.querySelector('.g-void');
+        voidEl.addEventListener('click', this.enterGate);
+
+        // Also allow clicking the container if the void is hard to hit,
+        // but void has pointer-events: auto and container might not?
+        // Let's stick to void as it's the visual target.
     }
 
     start(direction) {
@@ -38,52 +44,51 @@ export default class TransitionManager {
         this.isAnimating = true;
         this.direction = direction; // 'toRetro' or 'toStandard'
 
-        // 1. Show Overlay (Start Hidden)
-        this.overlay.style.display = 'block';
+        // 1. Play Sound
+        try {
+            this.audio.currentTime = 0;
+            this.audio.play().catch(e => console.log("Audio Play Failed (User interaction needed?):", e));
+        } catch (e) {
+            console.warn("Audio error:", e);
+        }
 
-        // Set colors based on direction
+        // 2. Set Colors
         const voidEl = this.overlay.querySelector('.g-void');
-        const gateEl = this.overlay.querySelector('.g-gate');
         const labelEl = this.overlay.querySelector('.g-label');
 
         if (direction === 'toRetro') {
-            // Going to Darkness/Code
-            voidEl.style.backgroundColor = '#000';
-            gateEl.style.backgroundColor = '#4af626';
-            gateEl.style.boxShadow = '0 0 30px #4af626';
-            labelEl.style.color = '#4af626';
+            // Standard -> Retro (Entering the Code/Void)
+            // Blue/Cyan glow (Bleach standard) or Green (Matrix)?
+            // User asked for "Bleach Garganta", usually blue/black.
+            voidEl.style.setProperty('--portal-glow', '#2C2CFF');
             labelEl.innerText = "INITIALISER LE SYSTEME";
+            labelEl.style.color = "#2C2CFF";
+            labelEl.style.textShadow = "0 0 10px #2C2CFF";
         } else {
-            // Going to Light/Standard
-            voidEl.style.backgroundColor = '#fff';
-            gateEl.style.backgroundColor = '#000';
-            gateEl.style.boxShadow = '0 0 30px #000';
-            labelEl.style.color = '#000';
+            // Retro -> Standard (Returning to Reality)
+            // Orange/Red (Hell Butterfly?) or White?
+            voidEl.style.setProperty('--portal-glow', '#FF4400');
             labelEl.innerText = "RETOUR A LA REALITE";
+            labelEl.style.color = "#FF4400";
+            labelEl.style.textShadow = "0 0 10px #FF4400";
         }
 
-        // 2. Animate Tear Open (CSS Class)
-        // Give browser a tick to render display:block
-        requestAnimationFrame(() => {
-            this.overlay.classList.add('active');
-            document.getElementById('app').classList.add('blur-transition');
-        });
+        // 3. Open Portal
+        this.overlay.classList.add('active');
+        document.getElementById('app').classList.add('blur-transition');
     }
 
     enterGate() {
-        if (!this.isAnimating) return;
+        console.log("Entering Garganta...");
 
-        console.log("Entering Gate...");
+        const voidEl = this.overlay.querySelector('.g-void');
+        voidEl.classList.add('entering'); // Triggers massive zoom
 
-        // 3. Zoom Effect
-        const gateContainer = this.overlay.querySelector('.g-gate-container');
-        gateContainer.classList.add('zooming');
-
-        // 4. Trigger State Change mid-zoom (when screen is fully covered by zoom)
+        // 4. Trigger State Change mid-zoom (when screen is black)
         setTimeout(() => {
             if (this.onComplete) this.onComplete(this.direction);
 
-            // 5. Resolve (Fade out to new reality)
+            // 5. Resolve
             this.resolve();
 
         }, 800);
@@ -98,9 +103,8 @@ export default class TransitionManager {
 
         setTimeout(() => {
             // Reset State
-            this.overlay.style.display = 'none';
             this.overlay.classList.remove('active', 'fading');
-            this.overlay.querySelector('.g-gate-container').classList.remove('zooming');
+            this.overlay.querySelector('.g-void').classList.remove('entering');
             this.isAnimating = false;
         }, 1000);
     }

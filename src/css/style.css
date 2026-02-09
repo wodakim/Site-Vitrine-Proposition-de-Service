@@ -877,79 +877,133 @@ body.custom-cursor-active * {
 #transition-overlay { display: none !important; }
 
 
-/* GARGANTA PORTAL FIXES */
+/* GARGANTA PORTAL (BLEACH STYLE) */
 #garganta-portal {
     position: fixed;
     inset: 0;
     z-index: 9999;
-    display: none;
-    overflow: hidden;
-    background: transparent;
+    display: none; /* Controlled by JS */
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.4); /* Slight dim */
+    backdrop-filter: blur(5px);
     pointer-events: none;
 }
 
 #garganta-portal.active {
+    display: flex;
     pointer-events: auto;
 }
 
-.g-void {
-    position: absolute;
-    inset: 0;
-    background: #000;
+/* The Void Container */
+.g-void-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    transform: scaleY(0);
-    transition: transform 0.8s cubic-bezier(0.8, 0, 0.2, 1);
-    transform-origin: center;
+    perspective: 1000px;
 }
 
-#garganta-portal.active .g-void {
-    transform: scaleY(1);
-}
-
-.g-gate-container {
+/* The Void Itself (Black Tear) */
+.g-void {
+    width: min(80vw, 600px);
+    height: min(50vh, 400px);
+    background: #000;
+    border-radius: 50%;
+    /* Start as a thin line */
+    transform: scaleY(0.02) scaleX(0.8);
     opacity: 0;
-    transition: opacity 0.5s ease 0.8s; /* Wait for tear */
+
+    /* Glow/Smoke Effect - Blue/Cyan for Standard->Retro, Red/Orange for Retro->Standard? handled via CSS var */
+    box-shadow:
+        0 0 20px var(--portal-glow, #2C2CFF),
+        0 0 60px var(--portal-glow, #2C2CFF),
+        inset 0 0 100px #000;
+
+    transition:
+        transform 1s cubic-bezier(0.2, 0.8, 0.2, 1),
+        opacity 0.5s ease;
+
     cursor: pointer;
-    text-align: center;
+    position: relative;
+    z-index: 10001;
+    overflow: hidden;
 }
 
-#garganta-portal.active .g-gate-container {
+/* Jagged Edge Simulation (Pseudo-element) */
+.g-void::before {
+    content: '';
+    position: absolute;
+    inset: -10px;
+    border-radius: 50%;
+    background: transparent;
+    box-shadow: 0 0 30px var(--portal-glow, #2C2CFF);
+    z-index: -1;
+    filter: blur(10px);
+    opacity: 0.8;
+    animation: portal-pulse 2s infinite ease-in-out;
+}
+
+/* Inner Turbulence (Optional) */
+.g-void::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(44, 44, 255, 0.1), transparent 70%);
+    opacity: 0.5;
+    mix-blend-mode: screen;
+}
+
+@keyframes portal-pulse {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.02); opacity: 1; }
+}
+
+/* Active State (Open) */
+#garganta-portal.active .g-void {
+    transform: scaleY(1) scaleX(1); /* Full Oval */
     opacity: 1;
 }
 
-.g-gate-container:hover .g-gate {
-    transform: scale(1.1);
-    box-shadow: 0 0 40px currentColor;
+/* Hover Effect */
+.g-void:hover {
+    box-shadow:
+        0 0 40px var(--portal-glow, #2C2CFF),
+        0 0 100px var(--portal-glow, #2C2CFF),
+        inset 0 0 50px #000;
 }
 
-.g-gate {
-    width: 2px;
-    height: 100px;
-    background: currentColor;
-    border-radius: 5px;
-    transition: all 0.3s ease;
-    margin: 0 auto 20px auto;
-}
-
+/* Label */
 .g-label {
+    margin-top: 40px;
     font-family: 'Space Mono', monospace;
-    font-size: 0.9rem;
-    letter-spacing: 0.2em;
+    font-size: 1rem;
+    letter-spacing: 0.3em;
     text-transform: uppercase;
-    opacity: 0.8;
+    color: white;
+    text-shadow: 0 0 10px white;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s ease 0.5s; /* Delay */
+    pointer-events: none;
 }
 
-/* ZOOM EFFECT */
-.g-gate-container.zooming {
-    transition: transform 1s cubic-bezier(0.7, 0, 0.3, 1), opacity 0.5s ease 0.5s;
-    transform: scale(80); /* Massive scale to fill screen */
-    opacity: 0; /* Fade out container itself eventually */
+#garganta-portal.active .g-label {
+    opacity: 1;
+    transform: translateY(0);
 }
 
-/* FADE OUT OVERLAY */
+/* ZOOM ENTRY EFFECT */
+.g-void.entering {
+    transform: scale(50) !important; /* Engulf screen */
+    transition: transform 1.5s cubic-bezier(0.7, 0, 0.2, 1);
+    pointer-events: none;
+}
+
+/* FADE OUT */
 #garganta-portal.fading {
     opacity: 0;
     transition: opacity 1s ease;
