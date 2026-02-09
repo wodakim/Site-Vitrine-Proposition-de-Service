@@ -1,4 +1,3 @@
-
 export default class Cursor {
     constructor() {
         // Bind methods
@@ -40,6 +39,10 @@ export default class Cursor {
         this.canvas.style.mixBlendMode = 'difference';
         this.canvas.style.opacity = '0'; // Hidden initially
         this.canvas.style.transition = 'opacity 0.5s ease';
+
+        // Set actual resolution
+        this.canvas.width = this.width;
+        this.canvas.height = this.height;
 
         document.body.appendChild(this.canvas);
 

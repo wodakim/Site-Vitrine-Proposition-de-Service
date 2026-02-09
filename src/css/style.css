@@ -19,14 +19,14 @@ html {
 body {
     background-color: var(--bg-color);
     color: var(--text-color);
-    font-family: var(--font-sans);
+    font-family: var(--font-sans) !important;
     margin: 0;
     /* overflow-y is managed by JS for virtual scroll */
     cursor: auto;
 }
 
 /* Typography */
-h1, h2, h3, h4 { font-family: var(--font-serif); font-weight: 400; margin: 0; }
+h1, h2, h3, h4 { font-family: var(--font-serif) !important; font-weight: 400; margin: 0; }
 p { line-height: 1.6; opacity: 0.8; }
 a { color: inherit; text-decoration: none; }
 
@@ -100,7 +100,7 @@ a { color: inherit; text-decoration: none; }
     margin-top: 40px;
     font-size: 1.2rem;
     max-width: 400px;
-    font-family: var(--font-sans);
+    font-family: var(--font-sans) !important;
 }
 
 /* Agency */
@@ -128,7 +128,7 @@ a { color: inherit; text-decoration: none; }
     font-size: 1.5rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    font-family: var(--font-sans);
+    font-family: var(--font-sans) !important;
     opacity: 0.5;
 }
 .services-grid {
@@ -142,7 +142,7 @@ a { color: inherit; text-decoration: none; }
     transition: background 0.3s ease;
 }
 .service-card:hover { background: rgba(255,255,255,0.05); }
-.service-id { font-family: var(--font-sans); opacity: 0.5; display: block; margin-bottom: 10px; }
+.service-id { font-family: var(--font-sans) !important; opacity: 0.5; display: block; margin-bottom: 10px; }
 .service-title { font-size: 2rem; margin-bottom: 20px; }
 .service-list { list-style: none; padding: 0; opacity: 0.7; }
 .service-list li { margin-bottom: 5px; }
@@ -165,10 +165,10 @@ a { color: inherit; text-decoration: none; }
 .project-row:hover { opacity: 1; color: white; } /* Highlight */
 .projects-list:hover .project-row:not(:hover) { opacity: 0.3; } /* Dim others */
 
-.p-client { font-family: var(--font-sans); opacity: 0.6; font-size: 0.8em; }
-.p-title { font-family: var(--font-serif); font-size: 1.5em; text-transform: uppercase; }
-.p-service { font-family: var(--font-sans); opacity: 0.6; font-size: 0.8em; text-align: right; }
-.p-year { font-family: var(--font-sans); opacity: 0.6; font-size: 0.8em; text-align: right; }
+.p-client { font-family: var(--font-sans) !important; opacity: 0.6; font-size: 0.8em; }
+.p-title { font-family: var(--font-serif) !important; font-size: 1.5em; text-transform: uppercase; }
+.p-service { font-family: var(--font-sans) !important; opacity: 0.6; font-size: 0.8em; text-align: right; }
+.p-year { font-family: var(--font-sans) !important; opacity: 0.6; font-size: 0.8em; text-align: right; }
 
 /* Project Thumb Reveal */
 #project-thumb-container {
@@ -200,7 +200,7 @@ a { color: inherit; text-decoration: none; }
     display: flex; justify-content: space-between;
     border-top: 1px solid rgba(255,255,255,0.1);
     padding-top: 20px;
-    font-family: var(--font-sans);
+    font-family: var(--font-sans) !important;
     opacity: 0.5;
 }
 
@@ -211,7 +211,7 @@ a { color: inherit; text-decoration: none; }
     padding: 15px 30px;
     border-radius: 50px;
     text-transform: uppercase;
-    font-family: var(--font-sans);
+    font-family: var(--font-sans) !important;
     font-size: 0.9rem;
     transition: all 0.3s;
     background: transparent;
@@ -248,7 +248,7 @@ a { color: inherit; text-decoration: none; }
     position: fixed;
     top: 40px; left: var(--pad);
     z-index: 50;
-    font-family: var(--font-sans);
+    font-family: var(--font-sans) !important;
     text-transform: uppercase;
     font-size: 0.9rem;
     opacity: 0.7;
@@ -269,7 +269,7 @@ a { color: inherit; text-decoration: none; }
 .detail-meta {
     display: flex;
     gap: 40px;
-    font-family: var(--font-sans);
+    font-family: var(--font-sans) !important;
     opacity: 0.6;
     margin-bottom: 60px;
     font-size: 0.9rem;
@@ -298,7 +298,7 @@ a { color: inherit; text-decoration: none; }
     font-size: clamp(1.2rem, 2vw, 2rem);
     line-height: 1.4;
     margin-left: auto;
-    font-family: var(--font-serif);
+    font-family: var(--font-serif) !important;
 }
 
 /* Ensure Links inside projects work as blocks */
@@ -387,7 +387,7 @@ a.project-row {
 }
 .main-nav a {
     pointer-events: auto;
-    font-family: var(--font-sans);
+    font-family: var(--font-sans) !important;
     text-transform: uppercase;
     font-size: 0.9rem;
     color: white; /* Difference blend mode makes it invert */
