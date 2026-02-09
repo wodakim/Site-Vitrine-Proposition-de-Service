@@ -98,15 +98,15 @@ class App {
             'agency': () => this.handleRoute('agency'),
             'services': () => this.handleRoute('services'),
             'work': () => this.handleRoute('work'),
-            'contact': () => this.handleRoute('contact')
+            'contact': (id, params) => this.handleRoute('contact', id, params) // Pass params
         };
 
         this.router = new Router(routes);
         this.router.init();
     }
 
-    async handleRoute(view, param) {
-        console.log(`[App] Handling route: ${view} (param: ${param})`);
+    async handleRoute(view, param, queryParams) {
+        console.log(`[App] Handling route: ${view} (param: ${param}) Query:`, queryParams);
 
         // Transition Out
         await this.animateTransition('out');
@@ -131,7 +131,7 @@ class App {
         } else if (view === 'work') {
             this.renderWorkPage();
         } else if (view === 'contact') {
-            this.renderContactPage();
+            this.renderContactPage(queryParams);
         }
 
         // Re-init Scroll Height & Cache
@@ -178,9 +178,10 @@ class App {
         renderFooter(this.data.footer, this.container);
     }
 
-    renderContactPage() {
+    renderContactPage(queryParams) {
         if (!this.data) return;
-        renderContactPage(this.data.footer, this.container);
+        // Pass Footer Data AND Services List + Query Params
+        renderContactPage(this.data.footer, this.data.services, queryParams, this.container);
     }
 
     renderProject(id) {

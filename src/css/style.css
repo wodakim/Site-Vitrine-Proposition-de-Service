@@ -412,3 +412,73 @@ body.custom-cursor-active,
 body.custom-cursor-active * {
     cursor: none !important;
 }
+
+/* CONTACT FORM */
+.contact-form-section {
+    padding-bottom: 50px;
+}
+
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-family: var(--font-sans) !important;
+}
+
+.form-group label {
+    font-size: 0.9rem;
+    opacity: 0.7;
+    text-transform: uppercase;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 15px 0;
+    color: var(--text-color);
+    font-family: var(--font-sans) !important;
+    font-size: 1.2rem;
+    outline: none;
+    transition: border-color 0.3s;
+    width: 100%;
+    border-radius: 0;
+    -webkit-appearance: none;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    border-color: var(--accent-color);
+}
+
+.form-group select {
+    cursor: pointer;
+}
+
+.form-group select option {
+    background: var(--bg-color);
+    color: var(--text-color);
+}
+
+/* File Input Styling */
+.form-group input[type="file"] {
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 20px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .contact-form-section > div {
+        grid-column: 1 / -1 !important;
+    }
+}

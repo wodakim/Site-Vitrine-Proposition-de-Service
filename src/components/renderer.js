@@ -83,12 +83,142 @@ export function renderWorkPage(data, container) {
 }
 
 // 3. CONTACT PAGE
-export function renderContactPage(data, container) {
+export function renderContactPage(data, services, queryParams, container) {
     if (!data) return;
-    // Footer essentially acts as contact page in this design, so we can just use renderFooter but maybe prepended with a header?
     renderPageHeader("CONTACT", "Prêt à tisser votre future identité numérique ?", container);
 
+    // Create Form Section
+    const section = document.createElement('section');
+    section.className = 'contact-form-section grid-container';
+    section.style.minHeight = '60vh';
+
+    // Determine pre-selected service
+    const preSelectedService = queryParams && queryParams.service ? queryParams.service : '';
+
+    // Build Service Options
+    let options = '<option value="" disabled selected>Sélectionnez un sujet</option>';
+    if (services && Array.isArray(services)) {
+        services.forEach(s => {
+            const isSelected = (s.id.toLowerCase() === preSelectedService.toLowerCase()) ||
+                               (s.title.toLowerCase().includes(preSelectedService.toLowerCase()));
+            options += `<option value="${s.title}" ${isSelected ? 'selected' : ''}>${s.title}</option>`;
+        });
+    }
+    options += `<option value="Autre">Autre demande</option>`;
+
+    section.innerHTML = `
+        <div style="grid-column: 4 / -1;">
+            <form id="contact-form" class="contact-form" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="name">Nom / Entreprise</label>
+                    <input type="text" id="name" name="name" required placeholder="Votre nom">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required placeholder="votre@email.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="service">Sujet</label>
+                    <div class="select-wrapper">
+                        <select id="service" name="service" required>
+                            ${options}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Message</label>
+                    <textarea id="message" name="message" required rows="5" placeholder="Parlez-nous de votre projet..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="file">Fichiers (Optionnel)</label>
+                    <input type="file" id="file" name="file" accept=".pdf,.jpg,.png,.doc,.docx">
+                    <small style="opacity:0.5; display:block; margin-top:5px; font-family:var(--font-sans);">Max 5MB. PDF, JPG, PNG.</small>
+                </div>
+
+                <!-- Recaptcha Placeholder -->
+                <div class="form-group" style="margin-top:20px;">
+                    <!-- REPLACE 'YOUR_SITE_KEY' WITH ACTUAL KEY -->
+                    <div class="g-recaptcha" data-sitekey="YOUR_RECAPTCHA_SITE_KEY_HERE"></div>
+                </div>
+
+                <div class="form-actions" style="margin-top:40px;">
+                    <button type="submit" class="btn-cta" data-hover="magnetic">Envoyer le message</button>
+                </div>
+
+                <div id="form-status" style="margin-top:20px; font-family:var(--font-sans);"></div>
+            </form>
+        </div>
+    `;
+
+    // Append to container
+    container.appendChild(section);
+
+    // Attach Event Listener
+    const form = section.querySelector('#contact-form');
+    form.addEventListener('submit', handleContactSubmit);
+
+    // Render Footer (Reuse data)
     renderFooter(data, container);
+
+    // Dynamically load Recaptcha if not present
+    if (!document.getElementById('recaptcha-script')) {
+        const script = document.createElement('script');
+        script.id = 'recaptcha-script';
+        script.src = 'https://www.google.com/recaptcha/api.js';
+        script.async = true;
+        script.defer = true;
+        document.body.appendChild(script);
+    }
+}
+
+async function handleContactSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const status = form.querySelector('#form-status');
+    const btn = form.querySelector('button');
+
+    status.innerHTML = 'Envoi en cours...';
+    status.style.color = 'white';
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+
+    const formData = new FormData(form);
+
+    try {
+        const response = await fetch('src/api/send_mail.php', {
+            method: 'POST',
+            body: formData
+        });
+
+        let result;
+        const text = await response.text();
+        try {
+            result = JSON.parse(text);
+        } catch (err) {
+            console.error("Non-JSON Response:", text);
+            throw new Error("Erreur serveur (réponse invalide).");
+        }
+
+        if (result.success) {
+            status.innerHTML = "Message envoyé avec succès ! Nous vous répondrons sous 24h.";
+            status.style.color = '#4af626'; // Terminal Green
+            form.reset();
+        } else {
+            throw new Error(result.message || "Erreur inconnue");
+        }
+
+    } catch (error) {
+        console.error(error);
+        status.innerHTML = "Erreur: " + error.message;
+        status.style.color = '#ff4400'; // Orange
+    } finally {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+    }
 }
 
 
