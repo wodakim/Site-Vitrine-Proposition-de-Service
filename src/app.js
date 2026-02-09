@@ -4,6 +4,7 @@ import SmoothScroll from './components/scroll.js';
 import Router from './components/router.js';
 import Cursor from './components/cursor.js';
 import LiquidEffect from './components/liquid.js';
+import RetroRenderer from './components/retroRenderer.js';
 
 class App {
     constructor() {
@@ -11,16 +12,21 @@ class App {
         this.scroll = null;
         this.router = null;
         this.liquid = null;
+        this.retroRenderer = null;
+
         this.data = null;
         this.container = null;
         this.loader = null;
         this.mouse = { x: 0, y: 0 };
+
+        this.isRetroMode = false;
 
         // Bind methods
         this.handleMouseMove = this.handleMouseMove.bind(this);
         this.handleProjectEnter = this.handleProjectEnter.bind(this);
         this.handleProjectLeave = this.handleProjectLeave.bind(this);
         this.animateTransition = this.animateTransition.bind(this);
+        this.toggleRetroMode = this.toggleRetroMode.bind(this);
     }
 
     async init() {
@@ -33,19 +39,16 @@ class App {
         noise.className = 'noise-overlay';
         document.body.appendChild(noise);
 
+        // Add Transition Overlay
+        const transitionOverlay = document.createElement('div');
+        transitionOverlay.id = 'transition-overlay';
+        document.body.appendChild(transitionOverlay);
+
         // Add Navigation Header (Menu Weaving Target)
-        const nav = document.createElement('nav');
-        nav.className = 'main-nav';
-        nav.innerHTML = `
-            <a href="#" class="nav-logo">LOGOLOOM</a>
-            <div class="nav-links">
-                <a href="#agency" data-hover="magnetic">Agency</a>
-                <a href="#work" data-hover="magnetic">Work</a>
-                <a href="#services" data-hover="magnetic">Services</a>
-                <a href="#contact" data-hover="magnetic">Contact</a>
-            </div>
-        `;
-        document.body.appendChild(nav);
+        this.createNav();
+
+        // Add Master Switch Toggle
+        this.createToggle();
 
         // Init Cursor (Physics String)
         new Cursor();
@@ -61,6 +64,9 @@ class App {
             const response = await fetch('./src/data/data.json');
             if (!response.ok) throw new Error("Erreur Chargement Données");
             this.data = await response.json();
+
+            // Init Retro Renderer
+            this.retroRenderer = new RetroRenderer(this.data, this.container);
 
             // 2. Init Router
             this.initRouter();
@@ -91,6 +97,80 @@ class App {
         }
     }
 
+    createNav() {
+        const nav = document.createElement('nav');
+        nav.className = 'main-nav';
+        nav.id = 'main-nav';
+        nav.innerHTML = `
+            <a href="#" class="nav-logo">LOGOLOOM</a>
+            <div class="nav-links">
+                <a href="#agency" data-hover="magnetic">Agency</a>
+                <a href="#work" data-hover="magnetic">Work</a>
+                <a href="#services" data-hover="magnetic">Services</a>
+                <a href="#contact" data-hover="magnetic">Contact</a>
+            </div>
+        `;
+        document.body.appendChild(nav);
+    }
+
+    createToggle() {
+        const toggleBtn = document.createElement('button');
+        toggleBtn.id = 'mode-toggle';
+        toggleBtn.className = 'mode-toggle';
+        toggleBtn.innerText = '●';
+        toggleBtn.title = "Switch Reality";
+        toggleBtn.addEventListener('click', this.toggleRetroMode);
+        document.body.appendChild(toggleBtn);
+    }
+
+    toggleRetroMode() {
+        const overlay = document.getElementById('transition-overlay');
+
+        // 1. Trigger Glitch Animation
+        overlay.classList.add('active');
+
+        // 2. Wait mid-animation to switch state
+        setTimeout(() => {
+            this.isRetroMode = !this.isRetroMode;
+
+            // Toggle Logic
+            if (this.isRetroMode) {
+                // Destroy Standard
+                if (this.scroll) this.scroll.destroy(); // Disable smooth scroll
+                document.body.style.height = '100vh'; // Reset height
+                document.body.style.overflow = 'hidden';
+                document.getElementById('main-nav').style.display = 'none'; // Hide standard nav
+                document.getElementById('mode-toggle').classList.add('retro');
+
+                // Render Retro
+                this.container.innerHTML = ''; // Clear
+                this.retroRenderer.init();
+
+            } else {
+                // Destroy Retro
+                this.retroRenderer.destroy();
+                document.getElementById('main-nav').style.display = 'flex';
+                document.getElementById('mode-toggle').classList.remove('retro');
+                document.body.style.overflow = '';
+
+                // Restore Standard
+                this.handleRoute(this.router.currentHash || 'home'); // Re-render current route
+
+                // Re-enable Scroll
+                 if (this.scroll) {
+                    this.scroll = new SmoothScroll();
+                    setTimeout(() => this.scroll.resize(), 100);
+                }
+            }
+
+        }, 800); // Half of animation duration
+
+        // 3. Remove Overlay
+        setTimeout(() => {
+            overlay.classList.remove('active');
+        }, 1600);
+    }
+
     initRouter() {
         const routes = {
             'home': () => this.handleRoute('home'),
@@ -98,7 +178,7 @@ class App {
             'agency': () => this.handleRoute('agency'),
             'services': () => this.handleRoute('services'),
             'work': () => this.handleRoute('work'),
-            'contact': (id, params) => this.handleRoute('contact', id, params) // Pass params
+            'contact': (id, params) => this.handleRoute('contact', id, params)
         };
 
         this.router = new Router(routes);
@@ -106,20 +186,24 @@ class App {
     }
 
     async handleRoute(view, param, queryParams) {
+        // If Retro Mode is active, Router changes should update the Retro Renderer or be ignored
+        // Ideally in Retro Mode, we are in a "Desktop" single page, but let's support hash changes if we want deep linking later.
+        // For now, if Retro Mode is ON, we ignore standard routing rendering, OR we map it to opening windows.
+
+        if (this.isRetroMode) {
+            console.log("Retro Mode Active: Route change ignored by Standard Renderer.");
+            return;
+        }
+
         console.log(`[App] Handling route: ${view} (param: ${param}) Query:`, queryParams);
 
         // Transition Out
         await this.animateTransition('out');
-        console.log("[App] Transition OUT complete");
 
-        // Scroll to Top
         window.scrollTo(0, 0);
-
-        // Clear DOM
         this.container.innerHTML = '';
 
         // Render New View
-        console.log("[App] Rendering view...");
         if (view === 'home') {
             this.renderHome();
         } else if (view === 'project') {
@@ -136,16 +220,13 @@ class App {
 
         // Re-init Scroll Height & Cache
         if (this.scroll) {
-            // Wait a tick for DOM to reflow
             requestAnimationFrame(() => {
-                console.log("[App] Resizing Scroll...");
-                this.scroll.resize(); // Recalculate height and recache elements
+                this.scroll.resize();
             });
         }
 
         // Transition In
         await this.animateTransition('in');
-        console.log("[App] Transition IN complete");
 
         // Re-init Observers/Interactions
         this.initScrollReveal();
@@ -180,7 +261,6 @@ class App {
 
     renderContactPage(queryParams) {
         if (!this.data) return;
-        // Pass Footer Data AND Services List + Query Params
         renderContactPage(this.data.footer, this.data.services, queryParams, this.container);
     }
 
@@ -212,7 +292,6 @@ class App {
     initScrollReveal() {
         if (this.observer) this.observer.disconnect();
 
-        // Observer for reveal animations
         const options = { threshold: 0.1, rootMargin: "0px 0px -50px 0px" };
 
         this.observer = new IntersectionObserver((entries) => {
@@ -224,8 +303,6 @@ class App {
             });
         }, options);
 
-        // Target elements
-        // Added .page-title for new pages
         const targets = document.querySelectorAll('.hero-title, .agency-manifesto, .service-card, .project-row, .footer-title, .detail-title, .detail-desc, .page-title');
         targets.forEach(el => {
             el.classList.add('reveal-hidden');
@@ -234,23 +311,18 @@ class App {
     }
 
     initProjectHover() {
-        // Since DOM is dynamic, we delegate or rebind.
-        // For simplicity here, we rebind on route change, but we need to handle the container availability.
         const container = document.getElementById('project-thumb-container');
         const img = document.getElementById('project-thumb-img');
 
         if (!container || !img) return;
 
-        // Ensure we don't duplicate listener on window
         window.removeEventListener('mousemove', this.handleMouseMove);
         window.addEventListener('mousemove', this.handleMouseMove);
 
-        // Wait for DOM to be ready
-        // Delegation:
         this.container.addEventListener('mouseenter', (e) => {
              const row = e.target.closest('.project-row');
              if (row) this.handleProjectEnter(e, row, img, container);
-        }, true); // Capture phase might be needed or just bubble
+        }, true);
 
         this.container.addEventListener('mouseleave', (e) => {
              const row = e.target.closest('.project-row');
@@ -272,11 +344,9 @@ class App {
         const url = row.dataset.img;
         if (!url) return;
 
-        // Use WebGL Liquid Effect if available
         if (this.liquid) {
             this.liquid.setImage(url);
         } else {
-            // Fallback
             img.src = url;
         }
 
@@ -289,7 +359,6 @@ class App {
     }
 }
 
-// Bootstrap
 window.addEventListener('DOMContentLoaded', () => {
     const app = new App();
     app.init();

@@ -87,7 +87,7 @@ export default class SmoothScroll {
         this.run();
     }
 
-    off() {
+    destroy() {
         if (this.rAF) cancelAnimationFrame(this.rAF);
         window.removeEventListener('resize', this.resize);
         this.isActive = false;
@@ -96,8 +96,14 @@ export default class SmoothScroll {
         if (this.dom.el) {
             this.dom.el.style.transform = '';
             this.dom.el.style.position = '';
+            this.dom.el.style.top = '';
+            this.dom.el.style.left = '';
+            this.dom.el.style.width = '';
+            this.dom.el.style.willChange = '';
+            this.dom.el.style.backfaceVisibility = '';
         }
         this.dom.body.style.height = '';
+        this.dom.body.style.overflowY = '';
     }
 
     setHeight() {
