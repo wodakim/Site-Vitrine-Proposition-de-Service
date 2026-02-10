@@ -133,35 +133,51 @@ export default class TransitionManager {
         this.animateFrame();
     }
 
-    enterGate() {
+    async enterGate() {
         if (this.state.entering) return;
         this.state.entering = true;
         console.log("Entering Garganta...");
 
-        // Visual "Enter" Effect
-        this.stage.style.transition = 'transform 1s cubic-bezier(0.7, 0, 0.2, 1), opacity 0.5s ease 0.8s';
+        // Visual "Enter" Effect (Zoom)
+        // Note: Removed opacity transition so it stays visible (Black Screen)
+        this.stage.style.transition = 'transform 1s cubic-bezier(0.7, 0, 0.2, 1)';
         this.stage.style.transform = 'scale(50)';
-        this.stage.style.opacity = '0';
+        this.stage.style.opacity = '1';
 
         // Hide Label immediately
         this.label.style.opacity = '0';
         this.label.style.transition = 'opacity 0.2s';
 
-        setTimeout(() => {
-            this.completeTransition();
-        }, 800);
+        // Wait for Zoom (1000ms)
+        await new Promise(r => setTimeout(r, 1000));
+
+        // Call the "Midpoint" Logic (The Swap) - BUFFER STATE
+        if (this.onComplete) {
+            await this.onComplete();
+        }
+
+        // Finalize (Fade Out)
+        this.completeTransition();
     }
 
     completeTransition() {
-        if (this.onComplete) this.onComplete();
+        this.portal.classList.add('fading');
+        this.portal.style.opacity = '0';
+        this.portal.style.transition = 'opacity 0.8s ease';
 
         setTimeout(() => {
             this.portal.classList.remove('active');
+            this.portal.classList.remove('fading');
+            this.portal.style.opacity = ''; // Reset
+            this.portal.style.transition = ''; // Reset
+
             this.isActive = false;
+            this.state.entering = false; // Reset lock
+
             cancelAnimationFrame(this.animationId);
             const particles = document.querySelectorAll('.particle');
             particles.forEach(p => p.remove());
-        }, 500);
+        }, 800);
     }
 
     // --- LOGIC FROM gargantaV2.html ---

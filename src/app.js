@@ -51,6 +51,9 @@ class App {
         // Add Master Switch Toggle
         this.createToggle();
 
+        // Init Void Loader
+        this.createVoidLoader();
+
         // Init Cursor (Physics String)
         new Cursor();
 
@@ -124,13 +127,36 @@ class App {
         document.body.appendChild(toggleBtn);
     }
 
-    toggleRetroMode() {
-        const direction = this.isRetroMode ? 'toStandard' : 'toRetro';
-        // Trigger Garganta
-        this.transitionManager.startTransition(() => this.completeTransition(direction), direction);
+    createVoidLoader() {
+        const loader = document.createElement('div');
+        loader.className = 'void-loader';
+        document.body.appendChild(loader);
+        this.voidLoader = loader;
     }
 
-    completeTransition(direction) {
+    showVoidLoader() {
+        if (this.voidLoader) this.voidLoader.style.opacity = "1";
+    }
+
+    hideVoidLoader() {
+        if (this.voidLoader) this.voidLoader.style.opacity = '0';
+    }
+
+    toggleRetroMode() {
+        const direction = this.isRetroMode ? 'toStandard' : 'toRetro';
+        // Trigger Garganta with Async Callback for Buffered Transition
+        this.transitionManager.startTransition(async () => {
+            await this.completeTransition(direction);
+        }, direction);
+    }
+
+    async completeTransition(direction) {
+        // 1. Show Void Buffer
+        this.showVoidLoader();
+
+        // Wait for render (yield)
+        await new Promise(r => setTimeout(r, 100));
+
         this.isRetroMode = !this.isRetroMode;
 
         if (this.isRetroMode) {
@@ -161,6 +187,13 @@ class App {
                 setTimeout(() => this.scroll.resize(), 100);
             }
         }
+
+        // 2. Artificial Buffer Delay (Stabilization)
+        // Allows browser to finish layout/paint of new DOM while screen is still black
+        await new Promise(r => setTimeout(r, 800));
+
+        // 3. Hide Void Buffer
+        this.hideVoidLoader();
     }
 
     initRouter() {

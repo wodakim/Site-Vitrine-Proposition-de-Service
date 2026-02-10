@@ -993,3 +993,26 @@ body.custom-cursor-active * {
         font-size: 2rem;
     }
 }
+
+/* VOID LOADER (BUFFER STATE) */
+.void-loader {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    border: 2px solid rgba(255,255,255,0.1);
+    border-left-color: #fff;
+    border-radius: 50%;
+    animation: void-spin 1s linear infinite;
+    z-index: 20000; /* Above Portal (10000) */
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+@keyframes void-spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
