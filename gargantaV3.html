@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garganta Canvas - Performance Max</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="gargantaCanvas"></canvas>
+
+<script>
+    /**
+     * SOLUTION PERFORMANCE : CANVAS API
+     * Au lieu de modifier le DOM, on dessine des pixels.
+     * C'est géré par le GPU et ne bloque pas le thread principal du navigateur.
+     */
+    
+    const canvas = document.getElementById('gargantaCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let width, height, centerX, centerY;
+    
+    // Configuration
+    const config = {
+        openingSpeed: 0.005,      // Vitesse d'ouverture
+        maxHeightRatio: 0.6,      // Hauteur max (60% de l'écran)
+        maxWidthRatio: 0.9,       // Largeur max
+        teethAmplitude: 20,       // Taille des pics
+        teethFrequency: 0.05,     // Densité des pics
+        particleCount: 50,        // Max particules actives
+        glowColor: 'rgba(0, 255, 255, 0.6)', // Couleur du Reiatsu
+        glowBlur: 20              // Intensité du néon
+    };
+
+    let state = {
+        openRatio: 0,
+        time: 0,
+        particles: []
+    };
+
+    // Redimensionnement propre
+    function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+        centerX = width / 2;
+        centerY = height / 2;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // --- MATHS (Bruit fluide) ---
+    // Superposition d'ondes pour créer un mouvement liquide organique
+    function getNoise(x, t) {
+        return Math.sin(x * 0.01 + t) * Math.sin(x * 0.03 + t * 2) * Math.sin(x * 0.1 + t * 0.5);
+    }
+
+    // --- RENDU ---
+    function draw() {
+        // 1. Nettoyer l'écran (Performance: on efface tout à chaque frame)
+        ctx.clearRect(0, 0, width, height);
+
+        state.time += 0.05;
+
+        // Gestion de l'ouverture
+        if (state.openRatio < 1) {
+            state.openRatio += (1 - state.openRatio) * 0.02; // Easing doux
+            if (state.openRatio > 0.99) state.openRatio = 1;
+        }
+
+        // Si c'est fermé, on ne dessine rien (opti)
+        if (state.openRatio < 0.001) {
+            requestAnimationFrame(draw);
+            return;
+        }
+
+        // --- DESSIN DU GARGANTA ---
+        const currentW = width * config.maxWidthRatio * Math.sqrt(state.openRatio); // S'ouvre vite en largeur
+        const currentH = height * config.maxHeightRatio * state.openRatio;
+
+        ctx.beginPath();
+        
+        // Configuration du style (Néon)
+        ctx.fillStyle = '#000'; // L'intérieur est noir
+        ctx.shadowBlur = config.glowBlur; // Le flou néon
+        ctx.shadowColor = config.glowColor;
+
+        // Dessiner la ligne du HAUT
+        // On dessine point par point pour créer les dents
+        const steps = 100; // Résolution de la courbe
+        for (let i = 0; i <= steps; i++) {
+            const pct = i / steps;
+            const x = centerX - (currentW / 2) + (currentW * pct);
+            
+            // Forme ovale de base (arc de cercle)
+            // Math.sin(0 à PI) donne une bosse : 0 -> 1 -> 0
+            const arch = Math.sin(pct * Math.PI); 
+            
+            // Calcul du bruit (Dents)
+            // On réduit le bruit quand c'est totalement ouvert pour lisser
+            const noiseFactor = (1 - (state.openRatio * 0.8)); 
+            const noise = getNoise(x, state.time) * config.teethAmplitude * noiseFactor * arch;
+            
+            const y = centerY - (currentH / 2 * arch) + noise;
+            
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+
+        // Dessiner la ligne du BAS (retour vers la gauche)
+        for (let i = steps; i >= 0; i--) {
+            const pct = i / steps;
+            const x = centerX - (currentW / 2) + (currentW * pct);
+            const arch = Math.sin(pct * Math.PI);
+            
+            // Bruit décalé pour le bas
+            const noiseFactor = (1 - (state.openRatio * 0.8));
+            const noise = getNoise(x + 100, state.time) * config.teethAmplitude * noiseFactor * arch;
+            
+            const y = centerY + (currentH / 2 * arch) + noise;
+            
+            ctx.lineTo(x, y);
+        }
+
+        ctx.closePath();
+        ctx.fill(); // Remplir le vide noir + l'ombre portée
+
+        // Réinitialiser l'ombre pour les particules (sinon trop lourd)
+        ctx.shadowBlur = 0;
+
+
+        // --- PARTICULES (REIATSU) ---
+        // Gestion des particules ultra-rapide (tableaux simples)
+        
+        // Générer une nouvelle particule ?
+        if (state.particles.length < config.particleCount && Math.random() < 0.3 * state.openRatio) {
+            state.particles.push({
+                x: centerX + (Math.random() - 0.5) * currentW * 0.8,
+                y: centerY + (Math.random() - 0.5) * currentH * 0.2,
+                size: Math.random() * 3 + 1,
+                vx: (Math.random() - 0.5) * 2,
+                vy: (Math.random() - 1) * 2 - 1, // Monte légèrement
+                life: 1 // Vie de 1 à 0
+            });
+        }
+
+        // Mettre à jour et dessiner les particules
+        ctx.fillStyle = '#0ff'; // Cyan
+        for (let i = state.particles.length - 1; i >= 0; i--) {
+            let p = state.particles[i];
+            
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life -= 0.02; // Meurt petit à petit
+
+            if (p.life <= 0) {
+                state.particles.splice(i, 1); // Supprimer si morte
+            } else {
+                ctx.globalAlpha = p.life;
+                ctx.fillRect(p.x, p.y, p.size, p.size); // fillRect est ultra rapide
+            }
+        }
+        ctx.globalAlpha = 1; // Remettre l'opacité normale
+
+        requestAnimationFrame(draw);
+    }
+
+    // Lancer l'animation
+    draw();
+
+</script>
+</body>
+</html>
