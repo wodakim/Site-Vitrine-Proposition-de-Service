@@ -142,6 +142,9 @@ export default class TransitionManager {
         this.label.style.opacity = '0';
         this.label.style.pointerEvents = 'none'; // Not clickable until open
 
+        // Disable Void interaction initially
+        this.voidElement.style.pointerEvents = 'none';
+
         this.playAudio();
 
         if (this.animationId) cancelAnimationFrame(this.animationId);
@@ -312,38 +315,52 @@ export default class TransitionManager {
 
         this.state.time += 0.1;
 
-        // 1. Opening
+        // 1. Opening & Freeze Logic
         if (this.state.isOpening) {
             this.state.openRatio += this.config.openingSpeed;
+
+            // Check if fully open
             if (this.state.openRatio >= 1) {
+                // FORCE FREEZE STATE
                 this.state.openRatio = 1;
                 this.state.isOpening = false;
+
+                // Final visual update (Static Shape)
+                this.updateShape();
+                this.voidElement.style.transform = `translate(0,0)`;
+
+                // ENABLE INTERACTION (Only now)
+                this.label.style.opacity = '1';
+                this.label.style.pointerEvents = 'auto';
+                this.voidElement.style.pointerEvents = 'auto';
+
+                console.log("TM: Garganta fully open. Animation frozen.");
+
+                // STOP ANIMATION LOOP
+                cancelAnimationFrame(this.animationId);
+                return;
             }
         }
 
-        // 2. Shape
+        // 2. Shape (Continuous update while opening)
         this.updateShape();
 
-        // 3. Shake
-        if (this.state.openRatio < 1) {
-            const shake = (1 - this.state.openRatio) * this.config.shakeIntensity;
-            const sx = (Math.random() - 0.5) * shake;
-            const sy = (Math.random() - 0.5) * shake;
-            this.voidElement.style.transform = `translate(${sx}px, ${sy}px)`;
-        } else {
-            this.voidElement.style.transform = `translate(0,0)`;
-        }
+        // 3. Shake (Continuous update while opening)
+        const shake = (1 - this.state.openRatio) * this.config.shakeIntensity;
+        const sx = (Math.random() - 0.5) * shake;
+        const sy = (Math.random() - 0.5) * shake;
+        this.voidElement.style.transform = `translate(${sx}px, ${sy}px)`;
 
-        // 4. Label Visibility (Center Appearance)
-        // Invisible when closed (ratio < 0.5). Fade in after.
-        if (this.state.openRatio > 0.6) {
-             this.label.style.opacity = '1';
-             this.label.style.pointerEvents = 'auto';
-             // Scale up slightly for dramatic effect?
-             // this.label.style.transform = `scale(${0.8 + 0.2 * this.state.openRatio})`;
-        } else {
-             this.label.style.opacity = '0';
-             this.label.style.pointerEvents = 'none';
+        // 4. Label Visibility (Intermediate Fade)
+        // Keep hidden/low opacity until freeze? Or fade in but not clickable?
+        // User requested: "fige le totalement une fois le lien ... est clicable"
+        // And "le rendre clicable qu'une fois la faille totalement ouverte"
+        // So pointerEvents stays none (default from startTransition).
+        // Visual feedback: Maybe fade in slightly?
+        // Let's keep it simple: Opacity stays 0 until fully open, then snaps/fades to 1.
+        // Actually, let's fade opacity based on ratio but keep pointerEvents none.
+        if (this.state.openRatio > 0.8) {
+             this.label.style.opacity = (this.state.openRatio - 0.8) * 5; // 0 to 1 between 0.8 and 1.0
         }
 
         // 5. Reiatsu

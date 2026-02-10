@@ -28,6 +28,10 @@ The transition between modes is handled by `src/components/transition.js`. It us
 -   `src/app-retro.js`: Retro mode initialization.
 -   `src/css/style.css`: Global styles (Standard + Retro specific overrides).
 
+## Assets
+-   **Audio:** Ensure `bleach-garganta.mp3` is placed in `assets/audio/`. The transition logic attempts to load this file.
+-   **Images/Fonts:** Located in `assets/`.
+
 ## Developer Notes
 -   **Do not revert to SPA/Twin DOM:** The previous attempt to keep both DOM trees in memory caused severe lag and complexity. The MPA approach cleanly separates contexts.
 -   **Testing:** Verify navigation by checking the URL parameters and ensuring the visual transition (Void overlay) plays smoothly on both exit and entrance.
