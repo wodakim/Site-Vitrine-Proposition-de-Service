@@ -134,30 +134,37 @@ export default class TransitionManager {
     }
 
     async enterGate() {
-        if (this.state.entering) return;
-        this.state.entering = true;
-        console.log("Entering Garganta...");
+        try {
+            if (this.state.entering) return;
+            this.state.entering = true;
+            console.log("Entering Garganta...");
 
-        // Visual "Enter" Effect (Zoom)
-        // Note: Removed opacity transition so it stays visible (Black Screen)
-        this.stage.style.transition = 'transform 1s cubic-bezier(0.7, 0, 0.2, 1)';
-        this.stage.style.transform = 'scale(50)';
-        this.stage.style.opacity = '1';
+            // Visual "Enter" Effect (Zoom)
+            // Note: Removed opacity transition so it stays visible (Black Screen)
+            this.stage.style.transition = 'transform 1s cubic-bezier(0.7, 0, 0.2, 1)';
+            this.stage.style.transform = 'scale(50)';
+            this.stage.style.opacity = '1';
 
-        // Hide Label immediately
-        this.label.style.opacity = '0';
-        this.label.style.transition = 'opacity 0.2s';
+            // Hide Label immediately
+            this.label.style.opacity = '0';
+            this.label.style.transition = 'opacity 0.2s';
 
-        // Wait for Zoom (1000ms)
-        await new Promise(r => setTimeout(r, 1000));
+            // Wait for Zoom (1000ms)
 
-        // Call the "Midpoint" Logic (The Swap) - BUFFER STATE
-        if (this.onComplete) {
-            await this.onComplete();
+            await new Promise(r => setTimeout(r, 1000));
+
+
+            // Call the "Midpoint" Logic (The Swap) - BUFFER STATE
+            if (this.onComplete) {
+                await this.onComplete();
+            }
+
+
+            // Finalize (Fade Out)
+            this.completeTransition();
+        } catch (e) {
+            console.error("TM: Error", e);
         }
-
-        // Finalize (Fade Out)
-        this.completeTransition();
     }
 
     completeTransition() {

@@ -15,9 +15,11 @@ class App {
         this.liquid = null;
         this.retroRenderer = null;
         this.transitionManager = null;
+        this.cursor = null;
 
         this.data = null;
         this.container = null;
+        this.retroContainer = null;
         this.loader = null;
         this.mouse = { x: 0, y: 0 };
 
@@ -33,9 +35,10 @@ class App {
     }
 
     async init() {
-        console.log("LogoLoom: Init (Vanilla v3 - SPA)");
+        console.log("LogoLoom: Init (Vanilla v3 - SPA Twin DOM)");
         this.loader = document.getElementById('loader');
-        this.container = document.getElementById('app');
+        this.container = document.getElementById('app-standard'); // Main Container
+        this.retroContainer = document.getElementById('app-retro'); // Twin Container
 
         // Add Noise Overlay
         const noise = document.createElement('div');
@@ -55,7 +58,7 @@ class App {
         this.createVoidLoader();
 
         // Init Cursor (Physics String)
-        new Cursor();
+        this.cursor = new Cursor();
 
         // Init Liquid Effect (WebGL)
         const thumbContainer = document.getElementById('project-thumb-container');
@@ -69,10 +72,13 @@ class App {
             if (!response.ok) throw new Error("Erreur Chargement Données");
             this.data = await response.json();
 
-            // Init Retro Renderer
-            this.retroRenderer = new RetroRenderer(this.data, this.container);
+            // 2. Init BOTH Renderers
 
-            // 2. Init Router
+            // Retro (Twin) - Init immediately but hidden
+            this.retroRenderer = new RetroRenderer(this.data, this.retroContainer);
+            this.retroRenderer.init();
+
+            // Standard (Router)
             this.initRouter();
 
             // 3. Init Scroll System (Initially empty)
@@ -144,6 +150,10 @@ class App {
 
     toggleRetroMode() {
         const direction = this.isRetroMode ? 'toStandard' : 'toRetro';
+
+        // PAUSE Cursor to save CPU
+        if (this.cursor) this.cursor.pause();
+
         // Trigger Garganta with Async Callback for Buffered Transition
         this.transitionManager.startTransition(async () => {
             await this.completeTransition(direction);
@@ -154,60 +164,52 @@ class App {
         // 1. Show Void Buffer
         this.showVoidLoader();
 
-        // Wait for paint (Force two Frames)
-        // This ensures the Loader is visible and screen is stable BEFORE heavy work
-        await new Promise(resolve => {
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    resolve();
-                });
-            });
-        });
+        // Wait for paint (setTimeout is safer than RAF in some contexts)
 
-        // Extra micro-delay for safety (100ms)
-        await new Promise(r => setTimeout(r, 100));
+        await new Promise(r => setTimeout(r, 200));
 
-        // 2. Perform HEAVY DOM SWAP in a non-blocking way (if possible)
+
+        // 2. TWIN DOM TOGGLE (Cheap)
         this.isRetroMode = !this.isRetroMode;
 
         if (this.isRetroMode) {
-            // Destroy Standard
-            if (this.scroll) this.scroll.destroy();
+            // ACTIVATE RETRO
+            this.container.style.display = "none";  // Hide Standard
+            this.retroContainer.style.display = "block";  // Show Retro
+
+            if (this.scroll) this.scroll.destroy(); // Disable Virtual Scroll events
+
             document.body.style.height = '100vh';
             document.body.style.overflow = 'hidden';
+
             document.getElementById('main-nav').style.display = 'none';
             document.getElementById('mode-toggle').classList.add('retro');
 
-            // Render Retro
-            this.container.innerHTML = '';
-
-            // Defer heavy Retro init slightly?
-            this.retroRenderer.init();
-
         } else {
-            // Destroy Retro
-            this.retroRenderer.destroy();
+            // ACTIVATE STANDARD
+            this.retroContainer.style.display = 'none'; // Hide Retro
+            this.container.style.display = 'block'; // Show Standard
+
             document.getElementById('main-nav').style.display = 'flex';
             document.getElementById('mode-toggle').classList.remove('retro');
             document.body.style.overflow = '';
 
-            // Restore Standard
-            this.handleRoute(this.router.currentHash || 'home');
-
-            // Re-enable Scroll (Heaviest part)
-             if (this.scroll) {
+            // Re-enable Scroll logic (but DOM is already there)
+            if (this.scroll) {
                 this.scroll = new SmoothScroll();
-                // Delay resize calculation until fade out begins or ends
-                setTimeout(() => this.scroll.resize(), 200);
+                setTimeout(() => this.scroll.resize(), 50); // Fast resize
             }
         }
 
-        // 3. Artificial Buffer Delay (Stabilization) - Increased to 1.2s
-        // Allows browser to finish layout/paint of new DOM while screen is still black
-        await new Promise(r => setTimeout(r, 1200));
+        // 3. Stabilization (Reduced buffer needed since no DOM heavy lifting)
+        // Keep it reasonable (800ms) for the "Garganta" effect to feel weighty
+        await new Promise(r => setTimeout(r, 800));
 
         // 4. Hide Void Buffer
         this.hideVoidLoader();
+
+        // RESUME Cursor
+        if (this.cursor) this.cursor.resume();
     }
 
     initRouter() {

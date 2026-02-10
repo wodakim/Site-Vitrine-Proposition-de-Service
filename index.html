@@ -20,10 +20,14 @@
         <div class="loader-bar"></div>
     </div>
 
-    <!-- Main Content -->
-    <main id="app">
+    <!-- Main Content (Twin DOM Architecture) -->
+    <!-- Standard Mode (Default) -->
+    <main id="app-standard">
         <!-- Content injected by JS -->
     </main>
+
+    <!-- Retro Mode (Hidden by default) -->
+    <div id="app-retro" style="display: none;"></div>
 
     <!-- Floating Thumb Container (CSS Only now) -->
     <div id="project-thumb-container">

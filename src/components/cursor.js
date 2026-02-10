@@ -20,12 +20,30 @@ export default class Cursor {
         this.isHovering = false;
         this.activeElement = null; // Store reference for re-calc
 
+        this.animationId = null;
+        this.isPaused = false;
+
         // Init points
         for (let i = 0; i < this.nPoints; i++) {
             this.points.push({ x: this.mouse.x, y: this.mouse.y });
         }
 
         this.init();
+    }
+
+    pause() {
+        this.isPaused = true;
+        if (this.animationId) {
+            cancelAnimationFrame(this.animationId);
+            this.animationId = null;
+        }
+    }
+
+    resume() {
+        if (this.isPaused) {
+            this.isPaused = false;
+            this.render();
+        }
     }
 
     init() {
@@ -169,6 +187,8 @@ export default class Cursor {
         this.ctx.fillStyle = '#EAEAEA';
         this.ctx.fill();
 
-        requestAnimationFrame(this.render);
+        if (!this.isPaused) {
+            this.animationId = requestAnimationFrame(this.render);
+        }
     }
 }
