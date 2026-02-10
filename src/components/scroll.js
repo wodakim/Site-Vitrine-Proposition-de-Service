@@ -36,8 +36,11 @@ export default class SmoothScroll {
     init() {
         console.log("[SmoothScroll] init");
         this.setupStyles();
-        this.cacheElements();
-        this.on();
+        // Defer heavy caching
+        requestAnimationFrame(() => {
+             this.cacheElements();
+             this.on();
+        });
     }
 
     setupStyles() {

@@ -15,11 +15,14 @@ export default class RetroRenderer {
     }
 
     init() {
-        this.container.classList.add('retro-mode');
-        this.renderDesktop();
+        // Optimization: Defer heavy DOM insertion slightly
+        requestAnimationFrame(() => {
+            this.container.classList.add('retro-mode');
+            this.renderDesktop();
 
-        // Listen for Konami Code globally only when in Retro Mode
-        this.bindKonami();
+            // Listen for Konami Code globally only when in Retro Mode
+            this.bindKonami();
+        });
     }
 
     destroy() {

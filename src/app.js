@@ -154,9 +154,20 @@ class App {
         // 1. Show Void Buffer
         this.showVoidLoader();
 
-        // Wait for render (yield)
+        // Wait for paint (Force two Frames)
+        // This ensures the Loader is visible and screen is stable BEFORE heavy work
+        await new Promise(resolve => {
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    resolve();
+                });
+            });
+        });
+
+        // Extra micro-delay for safety (100ms)
         await new Promise(r => setTimeout(r, 100));
 
+        // 2. Perform HEAVY DOM SWAP in a non-blocking way (if possible)
         this.isRetroMode = !this.isRetroMode;
 
         if (this.isRetroMode) {
@@ -169,6 +180,8 @@ class App {
 
             // Render Retro
             this.container.innerHTML = '';
+
+            // Defer heavy Retro init slightly?
             this.retroRenderer.init();
 
         } else {
@@ -181,18 +194,19 @@ class App {
             // Restore Standard
             this.handleRoute(this.router.currentHash || 'home');
 
-            // Re-enable Scroll
+            // Re-enable Scroll (Heaviest part)
              if (this.scroll) {
                 this.scroll = new SmoothScroll();
-                setTimeout(() => this.scroll.resize(), 100);
+                // Delay resize calculation until fade out begins or ends
+                setTimeout(() => this.scroll.resize(), 200);
             }
         }
 
-        // 2. Artificial Buffer Delay (Stabilization)
+        // 3. Artificial Buffer Delay (Stabilization) - Increased to 1.2s
         // Allows browser to finish layout/paint of new DOM while screen is still black
-        await new Promise(r => setTimeout(r, 800));
+        await new Promise(r => setTimeout(r, 1200));
 
-        // 3. Hide Void Buffer
+        // 4. Hide Void Buffer
         this.hideVoidLoader();
     }
 
