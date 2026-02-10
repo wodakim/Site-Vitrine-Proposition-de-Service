@@ -125,6 +125,18 @@ export default class SmoothScroll {
         this.data.target = window.scrollY;
     }
 
+    scrollTo(y, options = {}) {
+        window.scrollTo(0, y);
+        this.data.target = y;
+        if (options.immediate) {
+            this.data.current = y;
+            this.data.rounded = y;
+            if (this.dom.el) {
+                this.dom.el.style.transform = `translate3d(0, -${y}px, 0)`;
+            }
+        }
+    }
+
     lerp(start, end, t) {
         return start * (1 - t) + end * t;
     }

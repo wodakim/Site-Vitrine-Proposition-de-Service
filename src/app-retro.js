@@ -1,6 +1,6 @@
 
 import RetroRenderer from './components/retroRenderer.js';
-import TransitionManager from './components/transition.js';
+import TransitionManager from './core/TransitionManager.js';
 import Cursor from './components/cursor.js';
 
 // Retro App (Secondary Entry)

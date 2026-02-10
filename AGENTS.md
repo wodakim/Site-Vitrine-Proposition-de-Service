@@ -1,12 +1,20 @@
 # LogoLoom Development Guidelines
 
 ## Architecture Overview
-The project has transitioned from a Single Page Application (SPA) with DOM swapping to a **Multi-Page Application (MPA)** to ensure performance and stability across different rendering modes.
+The project is a **Multi-Page Application (MPA)** with a "No-Build" Vanilla JS architecture, designed for maximum performance and stability.
+
+### Directory Structure
+-   `src/core/`: Application logic (Router, ScrollManager, ViewManager, TransitionManager).
+-   `src/pages/`: Page-specific rendering logic (Home, Agency, Services, Work, etc.).
+-   `src/components/`: Reusable UI components (Cursor, LiquidEffect).
+-   `src/utils/`: Helper functions (renderHelpers.js).
+-   `src/data/`: Content (data.json).
 
 ### Pages & Modes
 1.  **Standard Mode (`index.html`):**
     -   Entry point: `src/app.js`
-    -   Tech: Vanilla JS, Lenis Scroll, WebGL Liquid Distortion.
+    -   Router: `src/core/Router.js` + `src/core/ViewManager.js`
+    -   Tech: Vanilla JS, Custom Scroll, WebGL Liquid Distortion.
     -   Design: Minimalist, "Heavy" typography, smooth scrolling.
 
 2.  **Retro Mode (`retro.html`):**
@@ -15,7 +23,7 @@ The project has transitioned from a Single Page Application (SPA) with DOM swapp
     -   Design: Terminal green, glitch effects, "Matrix" aesthetic.
 
 ### Navigation & Transitions (The "Garganta" Effect)
-The transition between modes is handled by `src/components/transition.js`. It uses a "Void" overlay (SVG/Canvas) to mask the page load.
+The transition between modes is handled by `src/core/TransitionManager.js`. It uses a Canvas-based "Void" overlay to mask the page load.
 
 -   **Trigger:** Clicking the mode toggle button (`#mode-toggle`) initiates the transition.
 -   **Step 1 (Exit):** The current page zooms into the void (`enterGate`).
@@ -23,10 +31,11 @@ The transition between modes is handled by `src/components/transition.js`. It us
 -   **Step 3 (Entrance):** The new page detects the parameter (in `checkEntrance()`) and plays the "Entrance" animation (fading out the void).
 
 ### Key Files
--   `src/components/transition.js`: Shared logic for the void effect.
+-   `src/core/TransitionManager.js`: Shared logic for the void effect (Canvas).
+-   `src/core/ScrollManager.js`: Custom smooth scroll implementation.
+-   `src/core/ViewManager.js`: Handles page mounting/unmounting and scroll resetting.
 -   `src/app.js`: Standard mode initialization.
 -   `src/app-retro.js`: Retro mode initialization.
--   `src/css/style.css`: Global styles (Standard + Retro specific overrides).
 
 ## Assets
 -   **Audio:** Ensure `bleach-garganta.mp3` is placed in `assets/audio/`. The transition logic attempts to load this file.
@@ -34,4 +43,5 @@ The transition between modes is handled by `src/components/transition.js`. It us
 
 ## Developer Notes
 -   **Do not revert to SPA/Twin DOM:** The previous attempt to keep both DOM trees in memory caused severe lag and complexity. The MPA approach cleanly separates contexts.
--   **Testing:** Verify navigation by checking the URL parameters and ensuring the visual transition (Void overlay) plays smoothly on both exit and entrance.
+-   **Strict Separation:** Keep rendering logic in `src/pages/` and core logic in `src/core/`.
+-   **Testing:** Verify navigation by checking URL parameters and ensuring the visual transition (Void overlay) plays smoothly.

@@ -1,65 +1,77 @@
 
-import { renderHero, renderAgency, renderServices, renderProjects, renderFooter, renderProjectDetail, renderServicesPage, renderWorkPage, renderContactPage, renderAgencyPage } from './components/renderer.js';
-import SmoothScroll from './components/scroll.js';
-import Router from './components/router.js';
+import Router from './core/Router.js';
+import ViewManager from './core/ViewManager.js';
+import ScrollManager from './core/ScrollManager.js';
+import TransitionManager from './core/TransitionManager.js';
+
+import * as Home from './pages/Home.js';
+import * as Agency from './pages/Agency.js';
+import * as Services from './pages/Services.js';
+import * as Work from './pages/Work.js';
+import * as Project from './pages/Project.js';
+import * as Contact from './pages/Contact.js';
+
 import Cursor from './components/cursor.js';
 import LiquidEffect from './components/liquid.js';
-import TransitionManager from './components/transition.js';
 
-// Standard App (Main)
 class App {
     constructor() {
-        this.scroll = null;
+        this.scrollManager = null;
         this.router = null;
-        this.liquid = null;
+        this.viewManager = null;
         this.transitionManager = null;
+        this.liquidEffect = null;
         this.data = null;
         this.container = null;
         this.loader = null;
 
-        // Bind
-        this.handleProjectEnter = this.handleProjectEnter.bind(this);
-        this.handleProjectLeave = this.handleProjectLeave.bind(this);
         this.toggleRetroMode = this.toggleRetroMode.bind(this);
     }
 
     async init() {
-        console.log("LogoLoom: Init (Standard Mode)");
+        console.log("LogoLoom: Init (Standard Mode - Refactored)");
         this.loader = document.getElementById('loader');
         this.container = document.getElementById('app');
 
-        // Add Noise
+        // Add Noise Overlay
         const noise = document.createElement('div');
         noise.className = 'noise-overlay';
         document.body.appendChild(noise);
 
-        // Transition Manager
-        this.transitionManager = new TransitionManager();
-
-        // Check if we arrived from Retro (Entrance Animation)
-        this.checkEntrance();
-
-        // Nav & Toggle
+        // Components
         this.createNav();
         this.createToggle();
-
-        // Cursor
         new Cursor();
 
-        // Liquid
-        const thumbContainer = document.getElementById('project-thumb-container');
-        if (thumbContainer) this.liquid = new LiquidEffect(thumbContainer);
+        // Transition Manager
+        this.transitionManager = new TransitionManager();
+        this.checkEntrance();
+
+        // Scroll Manager
+        this.scrollManager = new ScrollManager();
 
         try {
             const response = await fetch('./src/data/data.json');
             this.data = await response.json();
 
+            // View Manager
+            this.viewManager = new ViewManager(
+                this.container,
+                this.data,
+                this.scrollManager,
+                this.transitionManager
+            );
+
+            // Router
             this.initRouter();
 
-            // Scroll
-            this.scroll = new SmoothScroll();
-
-            this.initProjectHover();
+            // Liquid Effect
+            const thumbContainer = document.getElementById('project-thumb-container');
+            if (thumbContainer) {
+                // Initialize Liquid Effect
+                this.liquidEffect = new LiquidEffect(thumbContainer);
+                this.initProjectHover(thumbContainer);
+            }
 
             // Hide Loader
             setTimeout(() => {
@@ -70,20 +82,13 @@ class App {
             }, 500);
 
         } catch (error) {
-            console.error(error);
+            console.error("App Init Error:", error);
         }
     }
 
     checkEntrance() {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('from') === 'retro') {
-            // Play "Close" animation (Fade out void)
-            // We assume the page loads with a full-screen void overlay?
-            // Or we trigger the transition manager to "open" (visual exit).
-            // Actually, Garganta logic:
-            // "Enter" = Zoom In (to Void).
-            // "Exit" = Fade Out Void.
-            // If we just arrived, we are in the Void. We need to fade it out.
             this.transitionManager.playEntrance();
         }
     }
@@ -93,7 +98,7 @@ class App {
         nav.className = 'main-nav';
         nav.id = 'main-nav';
         nav.innerHTML = `
-            <a href="#" class="nav-logo">LOGOLOOM</a>
+            <a href="#home" class="nav-logo">LOGOLOOM</a>
             <div class="nav-links">
                 <a href="#agency" data-hover="magnetic">Agency</a>
                 <a href="#work" data-hover="magnetic">Work</a>
@@ -115,7 +120,6 @@ class App {
     }
 
     toggleRetroMode() {
-        // Trigger Transition -> Navigate
         this.transitionManager.startTransition(() => {
             window.location.href = 'retro.html?from=standard';
         }, 'toRetro');
@@ -123,97 +127,51 @@ class App {
 
     initRouter() {
         const routes = {
-            'home': () => this.renderHome(),
-            'project': (id) => this.renderProject(id),
-            'agency': () => this.renderAgencyPage(),
-            'services': () => this.renderServicesPage(),
-            'work': () => this.renderWorkPage(),
-            'contact': (id, params) => this.renderContactPage(params)
+            'home': () => this.viewManager.loadPage(Home),
+            'agency': () => this.viewManager.loadPage(Agency),
+            'services': () => this.viewManager.loadPage(Services),
+            'work': () => this.viewManager.loadPage(Work),
+            'project': (id) => this.viewManager.loadPage(Project, id),
+            'contact': (id, params) => this.viewManager.loadPage(Contact, params)
         };
 
         this.router = new Router(routes);
         this.router.init();
     }
 
-    // ... Render methods (Simplified for brevity, assuming they exist in renderer.js) ...
-    renderHome() {
-        if (!this.data) return;
-        renderHero(this.data.hero, this.container);
-        renderAgency(this.data.agency, this.container);
-        renderServices(this.data.services, this.container);
-        renderProjects(this.data.projects, this.container);
-        renderFooter(this.data.footer, this.container);
-        this.refreshScroll();
-    }
-
-    renderProject(id) {
-        // Implementation from memory
-        const p = this.data.projects.find(x => x.id === id);
-        if(p) renderProjectDetail(p, this.container);
-        this.refreshScroll();
-    }
-
-    renderAgencyPage() { renderAgencyPage(this.data.agency, this.container); this.refreshScroll(); }
-    renderServicesPage() { renderServicesPage(this.data.services, this.container); this.refreshScroll(); }
-    renderWorkPage() { renderWorkPage(this.data.projects, this.container); this.refreshScroll(); }
-    renderContactPage(p) { renderContactPage(this.data.footer, this.data.services, p, this.container); this.refreshScroll(); }
-
-    refreshScroll() {
-        if (this.scroll) {
-            setTimeout(() => this.scroll.resize(), 100);
-            this.initScrollReveal();
-        }
-    }
-
-    initScrollReveal() {
-        // ... (Same as before)
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('reveal-active');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.1 });
-
-        document.querySelectorAll('.hero-title, .agency-manifesto, .service-card, .project-row').forEach(el => {
-            el.classList.add('reveal-hidden');
-            observer.observe(el);
-        });
-    }
-
-    initProjectHover() {
-        const container = document.getElementById('project-thumb-container');
+    initProjectHover(thumbContainer) {
         const img = document.getElementById('project-thumb-img');
-        if (!container) return;
 
+        // Mouse Move for Thumbnail Position
         window.addEventListener('mousemove', (e) => {
-            if (container.style.opacity !== '0') {
-                container.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%, -50%)`;
+            if (thumbContainer.style.opacity !== '0') {
+                thumbContainer.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%, -50%)`;
             }
         });
 
-        this.container.addEventListener('mouseenter', (e) => {
+        // Mouse Enter/Leave Projects
+        // We use event delegation on 'app' because projects are dynamic
+        this.container.addEventListener('mouseover', (e) => {
              const row = e.target.closest('.project-row');
-             if (row) this.handleProjectEnter(row, img, container);
-        }, true);
+             if (row) {
+                 const url = row.dataset.img;
+                 if (url) {
+                     if (this.liquidEffect) {
+                         this.liquidEffect.setImage(url);
+                     } else if (img) {
+                         img.src = url;
+                     }
+                     thumbContainer.style.opacity = '1';
+                 }
+             }
+        });
 
-        this.container.addEventListener('mouseleave', (e) => {
+        this.container.addEventListener('mouseout', (e) => {
              const row = e.target.closest('.project-row');
-             if (row) this.handleProjectLeave(container);
-        }, true);
-    }
-
-    handleProjectEnter(row, img, container) {
-        const url = row.dataset.img;
-        if (!url) return;
-        if (this.liquid) this.liquid.setImage(url);
-        else img.src = url;
-        container.style.opacity = '1';
-    }
-
-    handleProjectLeave(container) {
-        container.style.opacity = '0';
+             if (row) {
+                 thumbContainer.style.opacity = '0';
+             }
+        });
     }
 }
 
