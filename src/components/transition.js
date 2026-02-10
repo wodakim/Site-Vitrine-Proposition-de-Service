@@ -2,28 +2,30 @@
 export default class TransitionManager {
     constructor() {
         this.portal = null;
-        this.voidElement = null;
-        this.stage = null;
+        this.canvas = null;
+        this.ctx = null;
         this.label = null;
         this.isActive = false;
         this.onComplete = null;
 
-        // CONFIG from gargantaV2.html
+        // CONFIG from gargantaV3.html (Canvas Optimized)
         this.config = {
-            openingSpeed: 0.008,
-            maxWidth: window.innerWidth * 0.9,
-            maxHeight: window.innerHeight * 0.5,
-            spikiness: 15,
-            density: 120,
-            shakeIntensity: 2
+            openingSpeed: 0.02,       // Vitesse d'ouverture (was 0.005 in demo, adjusted for UX)
+            maxHeightRatio: 0.6,      // Hauteur max (60% de l'écran)
+            maxWidthRatio: 0.9,       // Largeur max
+            teethAmplitude: 20,       // Taille des pics
+            particleCount: 50,        // Max particules actives
+            glowColor: 'rgba(0, 255, 255, 0.6)', // Couleur du Reiatsu
+            glowBlur: 20              // Intensité du néon
         };
 
-        // STATE from gargantaV2.html
+        // STATE from gargantaV3.html
         this.state = {
             openRatio: 0,
+            time: 0,
+            particles: [],
             isOpening: false,
-            entering: false, // My flag for zoom
-            time: 0
+            entering: false // Zoom flag
         };
 
         this.animationId = null;
@@ -35,44 +37,57 @@ export default class TransitionManager {
         this.handleResize = this.handleResize.bind(this);
         this.enterGate = this.enterGate.bind(this);
 
+        this.width = 0;
+        this.height = 0;
+        this.centerX = 0;
+        this.centerY = 0;
+
         this.init();
     }
 
     init() {
         const portal = document.createElement('div');
         portal.id = 'garganta-portal';
+        // Ensure portal covers screen but is initially hidden/transparent
+        // CSS handles display: none -> flex
 
-        const scene = document.createElement('div');
-        scene.id = 'scene'; // Renamed from stage to scene to match v2
-
-        const wrapper = document.createElement('div');
-        wrapper.className = 'garganta-wrapper';
-
-        const voidEl = document.createElement('div');
-        voidEl.id = 'void'; // Renamed from garganta-void to void
+        // Canvas Setup
+        const canvas = document.createElement('canvas');
+        canvas.id = 'gargantaCanvas';
+        // Style handled by CSS or JS reset
+        canvas.style.position = 'absolute';
+        canvas.style.top = '0';
+        canvas.style.left = '0';
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        canvas.style.pointerEvents = 'none'; // Canvas shouldn't block clicks initially
 
         const label = document.createElement('div');
         label.className = 'g-label';
         label.innerText = "INITIALISER LE SYSTÈME";
+        // Label must be above canvas
+        label.style.zIndex = '20';
 
-        // Structure: Portal -> Scene -> Wrapper -> Void
-        // Label inside Wrapper to be centered with Void? Or absolute center of screen?
-        // Void is centered in Wrapper. Wrapper is centered in Scene.
-        // Label should be centered absolutely in Wrapper.
-
-        wrapper.appendChild(voidEl);
-        wrapper.appendChild(label);
-        scene.appendChild(wrapper);
-        portal.appendChild(scene);
+        portal.appendChild(canvas);
+        portal.appendChild(label);
         document.body.appendChild(portal);
 
         this.portal = portal;
-        this.stage = scene; // Keep reference name internal
-        this.voidElement = voidEl;
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
         this.label = label;
 
         // Interaction
-        this.voidElement.addEventListener('click', this.enterGate);
+        // Canvas is the "void" visual. We need a way to click "the void".
+        // Since it's a canvas, we can listen on the canvas element itself,
+        // but checking if the click is "inside" the black shape is complex.
+        // For simplicity, if the portal is open, clicking anywhere on canvas (which covers screen) works?
+        // Or we just rely on the Label.
+        // User asked: "fige le totalement une fois le lien permetant d'entrer ou sortir de l'anomalie est clicable"
+        // So clicking the Label is the primary action.
+        // But maybe clicking the void center too?
+        // Let's add listener to canvas, but it will be pointer-events: none until freeze.
+        this.canvas.addEventListener('click', this.enterGate);
         this.label.addEventListener('click', this.enterGate);
 
         // Audio Setup
@@ -81,11 +96,18 @@ export default class TransitionManager {
 
         // Listeners
         window.addEventListener('resize', this.handleResize);
+        this.handleResize(); // Initial size
     }
 
     handleResize() {
-        this.config.maxWidth = window.innerWidth * 0.9;
-        this.config.maxHeight = window.innerHeight * 0.5;
+        this.width = window.innerWidth;
+        this.height = window.innerHeight;
+        if (this.canvas) {
+            this.canvas.width = this.width;
+            this.canvas.height = this.height;
+        }
+        this.centerX = this.width / 2;
+        this.centerY = this.height / 2;
     }
 
     playAudio() {
@@ -95,14 +117,22 @@ export default class TransitionManager {
         }
     }
 
-    playEntrance() {
-        // Called when page loads and we need to "Exit" the void (Fade In site)
-        console.log("TM: Playing Entrance (Fade Out Void)");
+    // --- MATHS (Bruit fluide) ---
+    getNoise(x, t) {
+        return Math.sin(x * 0.01 + t) * Math.sin(x * 0.03 + t * 2) * Math.sin(x * 0.1 + t * 0.5);
+    }
 
-        // We simulate the "End state" of enterGate
+    playEntrance() {
+        console.log("TM: Playing Entrance (V3 Canvas)");
+        // We simulate the "End state" then fade out
         this.portal.classList.add('active');
-        this.stage.style.transform = 'scale(50)'; // Already zoomed in
-        this.stage.style.opacity = '1';
+        // Initialize state to "Open"
+        this.state.openRatio = 1;
+        this.state.isOpening = false;
+
+        // Draw one frame to ensure visual is there
+        this.handleResize();
+        this.drawCanvas(); // Render static open state
 
         // Immediately trigger fade out
         requestAnimationFrame(() => {
@@ -111,7 +141,7 @@ export default class TransitionManager {
     }
 
     startTransition(callback, direction) {
-        console.log("Starting Garganta V2 Transition");
+        console.log("Starting Garganta V3 (Canvas) Transition");
         this.onComplete = callback;
         this.direction = direction;
 
@@ -132,18 +162,12 @@ export default class TransitionManager {
         this.state.isOpening = true;
         this.state.entering = false;
         this.state.time = 0;
+        this.state.particles = [];
 
         // Reset Visuals
-        this.stage.style.transform = 'scale(1)';
-        this.stage.style.opacity = '1';
-        this.stage.style.transition = 'none';
-
-        // Reset Label (Hidden initially)
         this.label.style.opacity = '0';
-        this.label.style.pointerEvents = 'none'; // Not clickable until open
-
-        // Disable Void interaction initially
-        this.voidElement.style.pointerEvents = 'none';
+        this.label.style.pointerEvents = 'none';
+        this.canvas.style.pointerEvents = 'none';
 
         this.playAudio();
 
@@ -157,11 +181,10 @@ export default class TransitionManager {
             this.state.entering = true;
             console.log("Entering Garganta...");
 
-            // Visual "Enter" Effect (Zoom)
-            // Note: Removed opacity transition so it stays visible (Black Screen)
-            this.stage.style.transition = 'transform 1s cubic-bezier(0.7, 0, 0.2, 1)';
-            this.stage.style.transform = 'scale(50)';
-            this.stage.style.opacity = '1';
+            // Visual "Enter" Effect (Zoom via CSS Transform on Canvas?)
+            // Canvas is just an image. We can scale it.
+            this.canvas.style.transition = 'transform 1s cubic-bezier(0.7, 0, 0.2, 1)';
+            this.canvas.style.transform = 'scale(50)';
 
             // Hide Label immediately
             this.label.style.opacity = '0';
@@ -174,8 +197,6 @@ export default class TransitionManager {
             if (this.onComplete) {
                 await this.onComplete();
             }
-            // Note: We do NOT call completeTransition() here because the page will unload.
-            // The Next Page will call playEntrance().
 
         } catch (e) {
             console.error("TM: Error", e);
@@ -183,7 +204,6 @@ export default class TransitionManager {
     }
 
     completeTransition() {
-        // Fades out the portal (Revealing the page)
         console.log("TM: completeTransition called. Fading out.");
         this.portal.classList.add('fading');
         this.portal.style.opacity = '0';
@@ -195,179 +215,129 @@ export default class TransitionManager {
             this.portal.classList.remove('fading');
             this.portal.style.opacity = ''; // Reset
             this.portal.style.transition = ''; // Reset
-            this.stage.style.transform = 'scale(1)'; // Reset
+            this.canvas.style.transform = 'scale(1)'; // Reset
 
             this.isActive = false;
             this.state.entering = false;
 
             cancelAnimationFrame(this.animationId);
-            const particles = document.querySelectorAll('.particle');
-            particles.forEach(p => p.remove());
+            // Clear canvas
+            this.ctx.clearRect(0, 0, this.width, this.height);
         }, 800);
     }
 
-    // --- LOGIC FROM gargantaV2.html ---
+    drawCanvas() {
+        // Core drawing logic extracted for re-use (Freeze state)
+        const { width, height, centerX, centerY, ctx, state, config } = this;
 
-    getSpike(i, total, seed) {
-        const baseFrequency = 0.5;
-        const jagged = Math.sin(i * baseFrequency + seed) * Math.cos(i * 0.8);
-        const edgeFactor = Math.sin((i / total) * Math.PI);
-        return jagged * this.config.spikiness * edgeFactor;
-    }
+        ctx.clearRect(0, 0, width, height);
 
-    updateShape() {
-        if (this.state.entering) return; // Optimize during zoom
+        const currentW = width * config.maxWidthRatio * Math.sqrt(state.openRatio);
+        const currentH = height * config.maxHeightRatio * state.openRatio;
 
-        const points = [];
-        const currentHeight = this.config.maxHeight * Math.pow(this.state.openRatio, 0.8);
+        ctx.beginPath();
+        ctx.fillStyle = '#000';
+        ctx.shadowBlur = config.glowBlur;
+        ctx.shadowColor = config.glowColor;
 
-        // 1. TOP LINE
-        for (let i = 0; i <= this.config.density; i++) {
-            const x = (i / this.config.density) * 100;
-            const archY = Math.sin((i / this.config.density) * Math.PI) * (currentHeight / 2) * this.state.openRatio;
-            const spike = this.getSpike(i, this.config.density, this.state.time);
+        const steps = 100;
 
-            // Center Y is 50%. Top arch goes UP (subtract Y).
-            // Normalize archY to percentage based on some reference height or window height?
-            // In user code: y = 50 - (archY / (window.innerHeight*0.6) * 100) + (spike/5);
-            // I should stick to that logic relative to window height.
+        // TOP LINE
+        for (let i = 0; i <= steps; i++) {
+            const pct = i / steps;
+            const x = centerX - (currentW / 2) + (currentW * pct);
+            const arch = Math.sin(pct * Math.PI);
+            const noiseFactor = (1 - (state.openRatio * 0.8));
+            const noise = this.getNoise(x, state.time) * config.teethAmplitude * noiseFactor * arch;
+            const y = centerY - (currentH / 2 * arch) + noise;
 
-            const y = 50 - (archY / (window.innerHeight * 0.6) * 100) + (spike/5);
-            points.push(`${x.toFixed(2)}% ${y.toFixed(2)}%`);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
         }
 
-        // 2. BOTTOM LINE
-        for (let i = this.config.density; i >= 0; i--) {
-            const x = (i / this.config.density) * 100;
-            const archY = Math.sin((i / this.config.density) * Math.PI) * (currentHeight / 2) * this.state.openRatio;
-            const spike = this.getSpike(i, this.config.density, this.state.time + 10);
-
-            // Bottom arch goes DOWN (add Y).
-            const y = 50 + (archY / (window.innerHeight * 0.6) * 100) + (spike/5);
-            points.push(`${x.toFixed(2)}% ${y.toFixed(2)}%`);
+        // BOTTOM LINE
+        for (let i = steps; i >= 0; i--) {
+            const pct = i / steps;
+            const x = centerX - (currentW / 2) + (currentW * pct);
+            const arch = Math.sin(pct * Math.PI);
+            const noiseFactor = (1 - (state.openRatio * 0.8));
+            const noise = this.getNoise(x + 100, state.time) * config.teethAmplitude * noiseFactor * arch;
+            const y = centerY + (currentH / 2 * arch) + noise;
+            ctx.lineTo(x, y);
         }
 
-        this.voidElement.style.clipPath = `polygon(${points.join(',')})`;
-
-        // Dynamic Width
-        this.voidElement.style.width = `${this.config.maxWidth * (0.1 + 0.9 * Math.sqrt(this.state.openRatio))}px`;
-    }
-
-    spawnParticle() {
-        if (this.state.entering) return;
-        if (this.state.openRatio < 0.1) return;
-
-        const p = document.createElement('div');
-        p.classList.add('particle');
-        // Append to wrapper so z-index works correctly relative to void
-        // In CSS: wrapper z-index 10, void z-index auto (inside wrapper).
-        // particles z-index 5.
-        // Wait, wrapper has filter.
-        // If particle is inside wrapper, it gets the filter too?
-        // User code: scene.appendChild(p). Scene is parent of wrapper.
-        // I should append to stage (scene).
-        this.stage.appendChild(p);
-
-        // Position Logic (User Code)
-        const spreadX = this.config.maxWidth * 0.8;
-        const startX = (Math.random() - 0.5) * spreadX;
-        const startY = (Math.random() - 0.5) * (this.config.maxHeight * this.state.openRatio * 0.5);
-
-        const size = Math.random() * 4 + 1;
-        p.style.width = `${size}px`;
-        p.style.height = `${size}px`;
-        // Centered in scene?
-        // Translate is relative to element position.
-        // .particle needs to be absolutely centered in #scene first?
-        // CSS for .particle: position: absolute.
-        // Since #scene is flex center center, position absolute defaults to top-left of relative parent?
-        // No, flex items absolute are removed from flow but positioned relative to nearest positioned ancestor.
-        // #scene is relative.
-        // So top:0 left:0 is top-left of scene.
-        // We want center.
-        p.style.left = '50%';
-        p.style.top = '50%';
-        // So translate(startX, startY) works from center.
-
-        p.style.transform = `translate(${startX}px, ${startY}px)`;
-        p.style.opacity = '0';
-
-        const angle = Math.atan2(startY, startX);
-        const velocity = Math.random() * 100 + 50;
-        const moveX = Math.cos(angle) * velocity;
-        const moveY = Math.sin(angle) * velocity;
-
-        const anim = p.animate([
-            { transform: `translate(${startX}px, ${startY}px) rotate(0deg)`, opacity: 0 },
-            { transform: `translate(${startX}px, ${startY}px) rotate(45deg)`, opacity: 1, offset: 0.2 },
-            { transform: `translate(${startX + moveX}px, ${startY + moveY - 50}px) rotate(90deg)`, opacity: 0 }
-        ], {
-            duration: Math.random() * 1000 + 800,
-            easing: 'ease-out'
-        });
-
-        anim.onfinish = () => p.remove();
+        ctx.closePath();
+        ctx.fill();
+        ctx.shadowBlur = 0; // Reset for particles
     }
 
     animateFrame() {
         if (!this.isActive) return;
-        if (this.state.entering) return; // Optimization
+        if (this.state.entering) return;
 
-        this.state.time += 0.1;
+        // Update State
+        this.state.time += 0.05;
 
-        // 1. Opening & Freeze Logic
+        // Opening Logic
         if (this.state.isOpening) {
-            this.state.openRatio += this.config.openingSpeed;
+            // Easing: Lerp towards 1
+            if (this.state.openRatio < 1) {
+                this.state.openRatio += (1 - this.state.openRatio) * this.config.openingSpeed;
+                // Snap to 1
+                if (this.state.openRatio > 0.99) {
+                     this.state.openRatio = 1;
+                     this.state.isOpening = false;
 
-            // Check if fully open
-            if (this.state.openRatio >= 1) {
-                // FORCE FREEZE STATE
-                this.state.openRatio = 1;
-                this.state.isOpening = false;
+                     // FREEZE LOGIC
+                     this.drawCanvas(); // Final static draw
 
-                // Final visual update (Static Shape)
-                this.updateShape();
-                this.voidElement.style.transform = `translate(0,0)`;
+                     // Enable Interactions
+                     this.label.style.opacity = '1';
+                     this.label.style.pointerEvents = 'auto';
+                     this.canvas.style.pointerEvents = 'auto'; // Clickable void
 
-                // ENABLE INTERACTION (Only now)
-                this.label.style.opacity = '1';
-                this.label.style.pointerEvents = 'auto';
-                this.voidElement.style.pointerEvents = 'auto';
-
-                console.log("TM: Garganta fully open. Animation frozen.");
-
-                // STOP ANIMATION LOOP
-                cancelAnimationFrame(this.animationId);
-                return;
+                     console.log("TM V3: Garganta fully open. Animation frozen.");
+                     cancelAnimationFrame(this.animationId);
+                     return;
+                }
             }
         }
 
-        // 2. Shape (Continuous update while opening)
-        this.updateShape();
+        // Draw Shape
+        this.drawCanvas();
 
-        // 3. Shake (Continuous update while opening)
-        const shake = (1 - this.state.openRatio) * this.config.shakeIntensity;
-        const sx = (Math.random() - 0.5) * shake;
-        const sy = (Math.random() - 0.5) * shake;
-        this.voidElement.style.transform = `translate(${sx}px, ${sy}px)`;
-
-        // 4. Label Visibility (Intermediate Fade)
-        // Keep hidden/low opacity until freeze? Or fade in but not clickable?
-        // User requested: "fige le totalement une fois le lien ... est clicable"
-        // And "le rendre clicable qu'une fois la faille totalement ouverte"
-        // So pointerEvents stays none (default from startTransition).
-        // Visual feedback: Maybe fade in slightly?
-        // Let's keep it simple: Opacity stays 0 until fully open, then snaps/fades to 1.
-        // Actually, let's fade opacity based on ratio but keep pointerEvents none.
+        // Label Fade (Intermediate)
         if (this.state.openRatio > 0.8) {
-             this.label.style.opacity = (this.state.openRatio - 0.8) * 5; // 0 to 1 between 0.8 and 1.0
+             this.label.style.opacity = (this.state.openRatio - 0.8) * 5;
         }
 
-        // 5. Reiatsu
-        if (Math.random() < this.state.openRatio) {
-             this.spawnParticle();
-             this.spawnParticle();
+        // Particles Logic
+        if (this.state.particles.length < this.config.particleCount && Math.random() < 0.3 * this.state.openRatio) {
+            this.state.particles.push({
+                x: this.centerX + (Math.random() - 0.5) * (this.width * this.config.maxWidthRatio * Math.sqrt(this.state.openRatio)) * 0.8,
+                y: this.centerY + (Math.random() - 0.5) * (this.height * this.config.maxHeightRatio * this.state.openRatio) * 0.2,
+                size: Math.random() * 3 + 1,
+                vx: (Math.random() - 0.5) * 2,
+                vy: (Math.random() - 1) * 2 - 1,
+                life: 1
+            });
         }
+
+        this.ctx.fillStyle = '#0ff';
+        for (let i = this.state.particles.length - 1; i >= 0; i--) {
+            let p = this.state.particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life -= 0.02;
+
+            if (p.life <= 0) {
+                this.state.particles.splice(i, 1);
+            } else {
+                this.ctx.globalAlpha = p.life;
+                this.ctx.fillRect(p.x, p.y, p.size, p.size);
+            }
+        }
+        this.ctx.globalAlpha = 1;
 
         this.animationId = requestAnimationFrame(this.animateFrame);
     }
