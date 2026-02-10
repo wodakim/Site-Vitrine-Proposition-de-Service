@@ -95,6 +95,21 @@ export default class TransitionManager {
         }
     }
 
+    playEntrance() {
+        // Called when page loads and we need to "Exit" the void (Fade In site)
+        console.log("TM: Playing Entrance (Fade Out Void)");
+
+        // We simulate the "End state" of enterGate
+        this.portal.classList.add('active');
+        this.stage.style.transform = 'scale(50)'; // Already zoomed in
+        this.stage.style.opacity = '1';
+
+        // Immediately trigger fade out
+        requestAnimationFrame(() => {
+             this.completeTransition();
+        });
+    }
+
     startTransition(callback, direction) {
         console.log("Starting Garganta V2 Transition");
         this.onComplete = callback;
@@ -150,36 +165,37 @@ export default class TransitionManager {
             this.label.style.transition = 'opacity 0.2s';
 
             // Wait for Zoom (1000ms)
-
             await new Promise(r => setTimeout(r, 1000));
 
-
-            // Call the "Midpoint" Logic (The Swap) - BUFFER STATE
+            // Navigation trigger
             if (this.onComplete) {
                 await this.onComplete();
             }
+            // Note: We do NOT call completeTransition() here because the page will unload.
+            // The Next Page will call playEntrance().
 
-
-            // Finalize (Fade Out)
-            this.completeTransition();
         } catch (e) {
             console.error("TM: Error", e);
         }
     }
 
     completeTransition() {
+        // Fades out the portal (Revealing the page)
+        console.log("TM: completeTransition called. Fading out.");
         this.portal.classList.add('fading');
         this.portal.style.opacity = '0';
         this.portal.style.transition = 'opacity 0.8s ease';
 
         setTimeout(() => {
+            console.log("TM: Removing active class.");
             this.portal.classList.remove('active');
             this.portal.classList.remove('fading');
             this.portal.style.opacity = ''; // Reset
             this.portal.style.transition = ''; // Reset
+            this.stage.style.transform = 'scale(1)'; // Reset
 
             this.isActive = false;
-            this.state.entering = false; // Reset lock
+            this.state.entering = false;
 
             cancelAnimationFrame(this.animationId);
             const particles = document.querySelectorAll('.particle');
