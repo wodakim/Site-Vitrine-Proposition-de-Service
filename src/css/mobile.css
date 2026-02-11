@@ -1,0 +1,133 @@
+/* src/css/mobile.css */
+
+@media (max-width: 768px) {
+    /* GRID RESET */
+    .grid-container {
+        display: flex !important;
+        flex-direction: column;
+        padding: 20px !important;
+    }
+
+    /* TYPOGRAPHY */
+    h1, .hero-title, .page-title {
+        font-size: 3rem !important;
+        line-height: 1.1 !important;
+    }
+
+    .hero-subtitle {
+        font-size: 1.2rem !important;
+        max-width: 100% !important;
+    }
+
+    /* NAV */
+    .main-nav {
+        padding: 20px !important;
+    }
+
+    .nav-links {
+        display: none !important; /* Hidden by default, shown by JS overlay */
+    }
+
+    /* BURGER MENU BUTTON (To be added via JS) */
+    .burger-menu-btn {
+        display: block !important;
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 10001;
+        background: none;
+        border: none;
+        color: var(--text-color);
+        font-size: 1.5rem;
+        cursor: pointer;
+    }
+
+    /* MOBILE MENU OVERLAY */
+    .mobile-menu-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        background: var(--bg-color);
+        z-index: 10000;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 30px;
+        transform: translateY(-100%);
+        transition: transform 0.5s cubic-bezier(0.7, 0, 0.3, 1);
+    }
+
+    .mobile-menu-overlay.active {
+        transform: translateY(0);
+    }
+
+    .mobile-menu-link {
+        font-family: var(--font-serif);
+        font-size: 2.5rem;
+        text-decoration: none;
+        color: var(--text-color);
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.5s, transform 0.5s;
+    }
+
+    .mobile-menu-overlay.active .mobile-menu-link {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* CONTENT ADJUSTMENTS */
+    .agency-text {
+        grid-column: auto !important;
+        margin-bottom: 40px;
+    }
+
+    .agency-media {
+        grid-column: auto !important;
+        height: 300px !important;
+    }
+
+    .projects-list {
+        grid-column: auto !important;
+    }
+
+    .project-row {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 20px 0;
+        gap: 10px;
+    }
+
+    .p-client, .p-year {
+        width: auto !important;
+    }
+
+    .p-title {
+        font-size: 2rem !important;
+    }
+
+    /* FOOTER */
+    .footer-main {
+        grid-column: auto !important;
+    }
+
+    .footer-title {
+        font-size: 2.5rem !important;
+    }
+
+    .footer-email {
+        font-size: 1.5rem !important;
+    }
+
+    /* DISABLE HOVER EFFECTS */
+    .cursor-canvas {
+        display: none !important;
+    }
+
+    #project-thumb-container {
+        display: none !important;
+    }
+}

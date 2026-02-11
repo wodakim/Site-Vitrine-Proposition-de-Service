@@ -2,6 +2,7 @@
 import Router from './core/Router.js';
 import ViewManager from './core/ViewManager.js';
 import ScrollManager from './core/ScrollManager.js';
+import SeoManager from './core/SeoManager.js'; // Import
 import TransitionManager from './core/TransitionManager.js';
 
 import * as Home from './pages/Home.js';
@@ -13,6 +14,7 @@ import * as Contact from './pages/Contact.js';
 
 import Cursor from './components/cursor.js';
 import LiquidEffect from './components/liquid.js';
+import MobileMenu from './components/mobileMenu.js'; // Import
 
 class App {
     constructor() {
@@ -42,6 +44,7 @@ class App {
         this.createNav();
         this.createToggle();
         new Cursor();
+        new MobileMenu(); // Init Mobile Menu
 
         // Transition Manager
         this.transitionManager = new TransitionManager();
@@ -54,12 +57,16 @@ class App {
             const response = await fetch('./src/data/data.json');
             this.data = await response.json();
 
+            // SEO Manager
+            this.seoManager = new SeoManager(this.data);
+
             // View Manager
             this.viewManager = new ViewManager(
                 this.container,
                 this.data,
                 this.scrollManager,
-                this.transitionManager
+                this.transitionManager,
+                this.seoManager // Pass SeoManager
             );
 
             // Router
@@ -127,12 +134,12 @@ class App {
 
     initRouter() {
         const routes = {
-            'home': () => this.viewManager.loadPage(Home),
-            'agency': () => this.viewManager.loadPage(Agency),
-            'services': () => this.viewManager.loadPage(Services),
-            'work': () => this.viewManager.loadPage(Work),
-            'project': (id) => this.viewManager.loadPage(Project, id),
-            'contact': (id, params) => this.viewManager.loadPage(Contact, params)
+            'home': () => this.viewManager.loadPage(Home, {}, 'home'),
+            'agency': () => this.viewManager.loadPage(Agency, {}, 'agency'),
+            'services': (id, params) => this.viewManager.loadPage(Services, id || params, 'services'),
+            'work': () => this.viewManager.loadPage(Work, {}, 'work'),
+            'project': (id) => this.viewManager.loadPage(Project, id, 'project'),
+            'contact': (id, params) => this.viewManager.loadPage(Contact, params, 'contact')
         };
 
         this.router = new Router(routes);

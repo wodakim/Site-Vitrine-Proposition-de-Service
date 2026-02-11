@@ -1,43 +1,41 @@
 
 export default class ViewManager {
-    constructor(container, data, scrollManager, transitionManager) {
+    constructor(container, data, scrollManager, transitionManager, seoManager) {
         this.container = container;
         this.data = data;
-        this.scrollManager = scrollManager; // Lenis instance
+        this.scrollManager = scrollManager;
         this.transitionManager = transitionManager;
+        this.seoManager = seoManager;
         this.currentPage = null;
     }
 
-    async loadPage(pageModule, params = {}) {
-        // 1. Trigger Exit Transition (if implemented)
-        // For now, we rely on the transition manager from App or simple fade
-        // But let's assume immediate switch for MVP + Scroll Reset
+    async loadPage(pageModule, params = {}, type = 'home') {
+        // SEO Update
+        if (this.seoManager) {
+            this.seoManager.update(type, params);
+        }
 
-        // 2. Unmount Current Page
+        // 1. Unmount Current Page
         if (this.currentPage && typeof this.currentPage.unmount === 'function') {
             this.currentPage.unmount();
         }
 
-        // 3. Clear Container
+        // 2. Clear Container
         this.container.innerHTML = '';
 
-        // 4. Reset Scroll
-        window.scrollTo(0, 0);
+        // 3. Reset Scroll
         if (this.scrollManager) {
             this.scrollManager.scrollTo(0, { immediate: true });
+        } else {
+            window.scrollTo(0, 0);
         }
 
-        // 5. Mount New Page
+        // 4. Mount New Page
         try {
             this.currentPage = pageModule;
             await pageModule.render(this.data, this.container, params);
 
-            // 6. Re-init Scroll / Reveal
-            // The Page module should return a promise that resolves when DOM is ready
-            // But render is usually sync.
-
-            // Trigger Reveal Animations
-            // We can dispatch an event or call a method
+            // 5. Re-init Scroll / Reveal
             if (this.scrollManager && typeof this.scrollManager.resize === 'function') {
                 this.scrollManager.resize();
             }
@@ -50,7 +48,6 @@ export default class ViewManager {
     }
 
     initScrollReveal() {
-        // Observer for reveal animations
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {

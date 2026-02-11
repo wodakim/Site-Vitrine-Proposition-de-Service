@@ -65,7 +65,7 @@ export function renderAgency(data, container) {
             <h2 class="agency-manifesto" data-skew="0.1">${words}</h2>
         </div>
         <div class="agency-media reveal-hidden" data-speed="0.1" style="transition-delay: 0.5s">
-            <img src="${data.media}" class="agency-img" alt="Agency" loading="lazy">
+            <img src="${data.media}" class="agency-img" alt="Agency" loading="lazy" width="800" height="600">
         </div>
     `;
     container.appendChild(section);
@@ -208,6 +208,7 @@ export function renderProjectDetail(project, container) {
     img.src = project.image;
     img.alt = project.title;
     img.className = "detail-img";
+    img.loading = "lazy";
 
     imgWrapper.appendChild(img);
     section.appendChild(imgWrapper);

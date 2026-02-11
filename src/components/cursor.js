@@ -1,9 +1,17 @@
 export default class Cursor {
     constructor() {
+        // --- MOBILE CHECK ---
+        // If touch device, do not initialize custom cursor
+        if (window.matchMedia("(pointer: coarse)").matches) {
+            console.log("[Cursor] Touch device detected. Custom cursor disabled.");
+            return;
+        }
+
         this.render = this.render.bind(this);
         this.update = this.update.bind(this);
 
         this.canvas = document.createElement('canvas');
+        this.canvas.className = 'cursor-canvas'; // Added class for CSS control
         this.ctx = this.canvas.getContext('2d');
         this.width = window.innerWidth;
         this.height = window.innerHeight;

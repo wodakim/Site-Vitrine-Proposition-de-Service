@@ -11,10 +11,42 @@
         "media": "assets/placeholder.svg"
     },
     "services": [
-        { "id": "01", "title": "Web Design", "list": ["UX/UI Design", "Prototypage", "Design Systems"] },
-        { "id": "02", "title": "Développement", "list": ["WebGL / Three.js", "Creative Coding", "Headless CMS"] },
-        { "id": "03", "title": "Branding", "list": ["Identité", "Stratégie", "Guidelines"] },
-        { "id": "04", "title": "SEO & Perf", "list": ["SEO Technique", "Core Web Vitals", "Optimisation"] }
+        {
+            "id": "01",
+            "title": "Web Design",
+            "description": "Nous concevons des interfaces qui captivent. Chaque interaction est pensée pour guider l'utilisateur vers l'action, tout en racontant votre histoire.",
+            "list": ["UX/UI Design", "Prototypage Interactif", "Design Systems", "Direction Artistique"]
+        },
+        {
+            "id": "02",
+            "title": "Développement",
+            "description": "Le code est notre toile. Nous utilisons les technologies les plus avancées (WebGL, Headless CMS) pour des sites rapides, sécurisés et évolutifs.",
+            "list": ["WebGL / Three.js", "Creative Coding", "Headless CMS", "React / Vue"]
+        },
+        {
+            "id": "03",
+            "title": "Branding",
+            "description": "Une marque forte ne se limite pas à un logo. Nous construisons des identités visuelles complètes qui incarnent vos valeurs et vous distinguent.",
+            "list": ["Identité Visuelle", "Stratégie de Marque", "Guidelines", "Naming"]
+        },
+        {
+            "id": "04",
+            "title": "Mobile Apps",
+            "description": "Des applications natives et hybrides qui prolongent votre expérience de marque dans la poche de vos clients.",
+            "list": ["iOS & Android", "React Native", "PWA (Progressive Web Apps)", "App Store Optimization"]
+        },
+        {
+            "id": "05",
+            "title": "Hosting",
+            "description": "Hébergement haute performance et gestion de noms de domaine. Dormez tranquille, nous gérons l'infrastructure.",
+            "list": ["Serveurs Dédiés", "Maintenance 24/7", "Certificats SSL", "Gestion DNS"]
+        },
+        {
+            "id": "06",
+            "title": "SEO & Perf",
+            "description": "Être beau ne suffit pas. Nous optimisons chaque ligne de code pour Google et pour la vitesse de chargement.",
+            "list": ["SEO Technique", "Core Web Vitals", "Audit de Performance", "Optimisation Images"]
+        }
     ],
     "projects": [
         { "id": "p1", "title": "Aether Spirits", "client": "Aether Inc.", "services": "WebGL / E-Commerce", "year": "2024", "image": "assets/nebula.jpg" },
