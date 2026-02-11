@@ -3,6 +3,7 @@ export default class WebGLManager {
         this.curtains = null;
         this.scrollOffset = 0;
         this.mouse = { x: 0, y: 0 };
+        this.planes = []; // Keep track of created planes
     }
 
     async init() {
@@ -11,21 +12,24 @@ export default class WebGLManager {
             return;
         }
 
-        this.curtains = new window.Curtains({
-            container: "canvas",
-            watchScroll: false, // Sync manually via Lenis
-            pixelRatio: Math.min(1.5, window.devicePixelRatio) // Performance optimization
-        });
+        // Only init curtains once
+        if (!this.curtains) {
+            this.curtains = new window.Curtains({
+                container: "canvas",
+                watchScroll: false, // Sync manually via Lenis
+                pixelRatio: Math.min(1.5, window.devicePixelRatio) // Performance optimization
+            });
 
-        this.curtains.onError(() => {
-            document.body.classList.add("no-curtains");
-        });
+            this.curtains.onError(() => {
+                document.body.classList.add("no-curtains");
+            });
 
-        // Global Mouse Events
-        window.addEventListener("mousemove", (e) => {
-            this.mouse.x = e.clientX;
-            this.mouse.y = e.clientY;
-        });
+            // Global Mouse Events
+            window.addEventListener("mousemove", (e) => {
+                this.mouse.x = e.clientX;
+                this.mouse.y = e.clientY;
+            });
+        }
 
         // Initialize Planes
         await Promise.all([
@@ -97,6 +101,7 @@ export default class WebGLManager {
             const plane = this.curtains.addPlane(heroWrapper, params);
 
             if (plane) {
+                this.planes.push(plane);
                 plane.onRender(() => {
                     plane.uniforms.uTime.value++;
                     const mousePos = plane.mouseToPlaneCoords(this.mouse.x, this.mouse.y);
@@ -159,6 +164,7 @@ export default class WebGLManager {
                 const plane = this.curtains.addPlane(img, params);
 
                 if (plane) {
+                    this.planes.push(plane);
                     const parentItem = img.closest('.project-item');
 
                     // Interaction
@@ -188,6 +194,19 @@ export default class WebGLManager {
 
         } catch (error) {
             console.error('Error loading shaders for projects:', error);
+        }
+    }
+
+    destroyPlanes() {
+        if (this.planes.length > 0) {
+            this.planes.forEach(plane => {
+                try {
+                    this.curtains.removePlane(plane);
+                } catch (e) {
+                    console.warn('Error removing plane', e);
+                }
+            });
+            this.planes = [];
         }
     }
 
