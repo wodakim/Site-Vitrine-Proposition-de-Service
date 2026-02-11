@@ -25,17 +25,23 @@ class App {
         const main = document.querySelector('main');
         if (main) main.style.opacity = '0';
 
+        // Initial progress
+        this.loader.updateProgress(10);
+
         // 1. Fetch Data
         try {
             const response = await fetch('./data/data.json');
             this.data = await response.json();
 
+            this.loader.updateProgress(30);
+
             // 2. Build DOM
             this.buildDOM();
 
+            this.loader.updateProgress(50);
+
             // 3. Init Components Logic
-            this.initAccordion();
-            this.initMagneticButtons();
+            this.initComponents();
 
         } catch (error) {
             console.error('Error loading data:', error);
@@ -44,6 +50,8 @@ class App {
         // 4. Init WebGL
         // Wait for WebGL to be fully initialized (textures loaded) before revealing
         await this.webglManager.init();
+
+        this.loader.updateProgress(90);
 
         // 5. Init Lenis (Smooth Scroll)
         this.initLenis();
@@ -59,6 +67,7 @@ class App {
         window.addEventListener('resize', this.onResize.bind(this));
 
         // 9. Hide Loader & Reveal Content
+        // hide() will push progress to 100%
         await this.loader.hide();
 
         if (main) {
@@ -80,6 +89,30 @@ class App {
                 if (window.ScrollTrigger) window.ScrollTrigger.refresh();
             }
         }
+    }
+
+    /**
+     * Called by Router after page transition
+     * @param {HTMLElement} newContainer
+     */
+    async onPageEnter(newContainer) {
+        // We assume Barba has already swapped the content inside <main>.
+
+        this.initComponents();
+
+        // Re-init WebGL for new content
+        // We need to tell WebGLManager to scan for new images
+        // We can reuse initHeroPlane / initProjects but they need to be robust to missing elements.
+        await this.webglManager.initHeroPlane();
+        await this.webglManager.initProjects();
+
+        // Refresh ScrollTrigger
+        if (window.ScrollTrigger) window.ScrollTrigger.refresh();
+    }
+
+    initComponents() {
+        this.initAccordion();
+        this.initMagneticButtons();
     }
 
     buildDOM() {
